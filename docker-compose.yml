@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_CLIENTVAR: "clientvar"
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    image: t3-app
+    environment:
+      - DATABASE_URL=postgresql://postgres:3TfD_2y2lgyql0sB@localhost:5432/nuhoc-hub
+  database:
+    image: "postgres:16"
+    environment:
+      - POSTGRES_PASSWORD=3TfD_2y2lgyql0sB
+      - POSTGRES_DB=nuhoc-hub
+    ports:
+      - "5432:5432"
