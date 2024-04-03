@@ -37,3 +37,11 @@ If you just want to run the database you can run:
 docker-compose up -d database
 
 ```
+
+To migrate the Prisma schema to the actual database, you can run:
+
+```bash
+
+npx prisma migrate dev --name init
+
+```
