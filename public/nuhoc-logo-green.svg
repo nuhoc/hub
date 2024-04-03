@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #479951;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <path id="NUHOC_Logo_Green" data-name="NUHOC Logo Green" class="cls-1" d="m128,0C57.31,0,0,57.31,0,128s57.31,128,128,128,128-57.31,128-128S198.69,0,128,0Zm0,12c64.07,0,116,51.93,116,116,0,15.34-2.98,29.98-8.39,43.38l-69.48-109.33-48.72,82.96-31.99-41.76-59.01,80.79c-9.18-16.61-14.41-35.71-14.41-56.03C12,63.93,63.93,12,128,12Z"/>
+  </g>
+</svg>
