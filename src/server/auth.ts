@@ -5,7 +5,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import GoogleProvider from "next-auth/providers/google"
+import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -45,12 +45,23 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
+    async signIn({ account, profile }) {
+      if (account?.provider === "google") {
+        // Only allow Northeastern emails
+        return (
+          !!profile?.email &&
+          (profile?.email?.endsWith("@husky.neu.edu") ||
+            profile?.email?.endsWith("@northeastern.edu"))
+        );
+      }
+      return true; // Do different verification for other providers that don't have `email_verified`
+    },
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
     /**
      * ...add more providers here.
