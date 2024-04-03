@@ -45,3 +45,10 @@ To migrate the Prisma schema to the actual database, you can run:
 npx prisma migrate dev --name init
 
 ```
+
+To start Prisma Studio (GUI tool for database), you can run:
+```bash
+
+npx prisma studio
+
+```
