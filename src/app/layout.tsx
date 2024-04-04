@@ -39,7 +39,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const hello = await api.post.hello({ text: "from tRPC" });
   const session = await getServerAuthSession();
 
   return (

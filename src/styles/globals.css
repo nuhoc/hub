@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  h1 {
+    @apply font-shrikhand text-8xl font-light capitalize;
+  }
+  h2 {
+    @apply font-shrikhand text-6xl font-light capitalize;
+  }
+  h3 {
+    @apply font-shrikhand text-5xl font-normal capitalize;
+  }
+  h4 {
+    @apply font-shrikhand text-4xl font-normal capitalize;
+  }
+  h5 {
+    @apply font-shrikhand text-2xl font-normal capitalize;
+  }
+  h6 {
+    @apply font-shrikhand text-xl font-medium capitalize;
+  }
+  strong {
+    @apply font-raleway text-base font-normal capitalize;
+  }
+  b {
+    @apply font-raleway text-sm font-medium capitalize;
+  }
+  p {
+    @apply font-raleway text-base font-normal capitalize;
+  }
+  small {
+    @apply font-raleway text-sm font-normal capitalize;
+  }
+  button {
+    @apply font-raleway text-base font-medium uppercase;
+  }
+  caption {
+    @apply font-raleway text-xs font-normal capitalize;
+  }
+  u {
+    @apply font-raleway text-xs font-normal uppercase no-underline;
+  }
+}
