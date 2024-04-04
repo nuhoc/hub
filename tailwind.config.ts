@@ -5,6 +5,10 @@ export default {
   content: ["./src/**/*.tsx"],
   theme: {
     extend: {
+      colors: {
+        primary: "#489851",
+        secondary: "#FFDE59",
+      },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
         shrikhand: ["var(--font-shrikhand)"],

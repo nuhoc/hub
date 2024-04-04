@@ -1,11 +1,11 @@
 export default async function Style() {
     const styles = [
         "bg-white text-black p-8",
-        "bg-green-700 text-white p-8",
-        "bg-white text-green-700 p-8",
+        "bg-primary text-white p-8",
+        "bg-white text-primary p-8",
     ]
     return <div className=" w-full h-full">
-        <h1 className="bg-white text-green-700 text-center p-8">Styling Guide</h1>
+        <h1 className="bg-white text-primary text-center p-8">Styling Guide</h1>
         {styles.map((style) =>
             <div className={style}>
                 <h1>Heading 1 (One)</h1>
