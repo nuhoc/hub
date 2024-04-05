@@ -1,3 +1,7 @@
 export default async function Account() {
-    return <div>Account</div>
+    return <main>
+        <h1 className=" text-primary text-center">
+            Account
+        </h1>
+    </main>
 }

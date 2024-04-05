@@ -15,7 +15,7 @@ export default {
         raleway: ["var(--font-raleway)"],
       },
       backgroundImage: {
-        "topo-pattern": "url('../../public/topo-pattern.svg')",
+        "topo-pattern": "url('../../public/contour-lines-nh-ma.svg')",
         "white-mountains": "url('../../public/white-mountains.webp')",
       },
     },
