@@ -1,3 +1,7 @@
 export default async function RentCheckout() {
-    return <div>RentCheckout</div>
+    return <main>
+        <h1 className=" text-primary text-center">
+            Checkout
+        </h1>
+    </main>
 }

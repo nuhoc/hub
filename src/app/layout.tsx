@@ -1,4 +1,3 @@
-import { CreatePost } from "~/app/_components/create-post";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -7,7 +6,8 @@ import "~/styles/globals.css";
 import { Inter, Shrikhand, Raleway } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { Navbar } from "./_components/Navbar";
+import { Navbar } from "./_components/navbar";
+import { Footer } from "./_components/footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,13 +42,19 @@ export default async function RootLayout({
   const session = await getServerAuthSession();
 
   return (
-    <html lang="en" className="bg-white bg-cover bg-topo-pattern w-full h-full">
-      <body className={`font-sans ${inter.variable} ${shrikhand.variable} ${raleway.variable}`}>
-        <TRPCReactProvider>
+    <TRPCReactProvider>
+      <html lang="en" className="bg-cover bg-white bg-topo-pattern h-screen">
+        <head>
+          <title>NUHOC Gear Locker</title>
+        </head>
+        <body className={`font-sans ${inter.variable} ${shrikhand.variable} ${raleway.variable} h-full w-full min-h-full flex flex-col justify-between`}>
           <Navbar loggedIn={!!session} />
-          <div>{children}</div>
-        </TRPCReactProvider>
-      </body>
-    </html>
+          <div className=" bg-white w-full bg-opacity-85 grow">
+            <div className=" h-full py-8 px-4 md:px-16 lg:px-40">{children}</div>
+          </div>
+          <Footer />
+        </body>
+      </html>
+    </TRPCReactProvider>
   );
 }
