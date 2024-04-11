@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
-
+import Barcode from '../_components/barcode';
 export default async function Account() {
     const session = await getServerAuthSession();
     const dayPassesLeft = 3; // TODO: Connect some sort of API to get accurate count
@@ -29,6 +29,9 @@ export default async function Account() {
                     </ul>
                 </div>
                 <button className=" disabled:bg-gray-500 bg-primary text-white px-8 py-3 rounded-lg" disabled><p>Renew Online (Coming Soon™)</p></button>
+                <div>
+                    {session && <Barcode value={session?.user.id} />}
+                </div>
             </div>
         </div>
     </main>
