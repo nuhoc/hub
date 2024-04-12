@@ -8,7 +8,7 @@ export default async function Style() {
         <h1 className=" text-primary text-center pb-8">Styling Guide</h1>
         <div className=" flex flex-col gap-16">
             {styles.map((style) =>
-                <div className={`${style} rounded-3xl outline outline-1 outline-gray-400`}>
+                <div className={`${style} rounded-3xl outline outline-1 outline-gray-400`} key={style}>
                     <h1>Heading 1 (One)</h1>
                     <h2>Heading 2 (Two)</h2>
                     <h3>Heading 3 (Three)</h3>
