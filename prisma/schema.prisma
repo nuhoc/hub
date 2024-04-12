@@ -20,10 +20,9 @@ model Membership {
   createdAt DateTime @default(now())
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id])
-  userId    String   @map("userId")
+  userId    String
 
   @@index([name])
-  @@map("Post")
 }
 
 // Necessary for Next auth
@@ -62,6 +61,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   memberships   Membership[]
+  renter        Rental[]     @relation("renter")
+  authorizer    Rental[]     @relation("authorizer")
 }
 
 model VerificationToken {
@@ -70,4 +71,64 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Gear Stuff
+model Rental {
+  id Int @id @default(autoincrement())
+
+  gearRented GearOnRental[]
+
+  renter   User   @relation("renter", fields: [renterId], references: [id])
+  renterId String
+
+  authorizer   User   @relation("authorizer", fields: [authorizerId], references: [id])
+  authorizerId String
+
+  rentStart  DateTime
+  rentDue    DateTime
+  rentReturn DateTime?
+
+  notes String?
+}
+
+model GearOnRental {
+  gear   Gear @relation(fields: [gearId], references: [id])
+  gearId Int // relation scalar field (used in the `@relation` attribute above)
+
+  rental   Rental @relation(fields: [rentalId], references: [id])
+  rentalId Int // relation scalar field (used in the `@relation` attribute above)
+
+  @@id([gearId, rentalId])
+}
+
+model Gear {
+  id    Int     @id @default(autoincrement())
+  brand String?
+  model String?
+
+  gearRented GearOnRental[]
+  categories CategoriesOnGear[]
+
+  notes    String?
+  rentable Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CategoriesOnGear {
+  gear   Gear @relation(fields: [gearId], references: [id])
+  gearId Int // relation scalar field (used in the `@relation` attribute above)
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int // relation scalar field (used in the `@relation` attribute above)
+
+  @@id([gearId, categoryId])
+}
+
+model Category {
+  id    Int                @id @default(autoincrement())
+  name  String
+  gears CategoriesOnGear[]
 }
