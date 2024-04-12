@@ -22,11 +22,19 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 
 ## How do run this?
 
-We have docker setup! So you can run the following commands:
+We have docker setup (frontend broken at the moment)! So you can run the following commands:
 
 ```bash
 
 docker-compose up -d
+
+```
+
+If you just want to run the frontend you can run:
+
+```bash
+
+npm run dev
 
 ```
 
@@ -38,11 +46,19 @@ docker-compose up -d database
 
 ```
 
-To migrate the Prisma schema to the actual database, you can run:
+To migrate the Prisma schema changes to database, you can run:
 
 ```bash
 
-npx prisma migrate dev --name init
+npx prisma migrate dev --name <message>
+
+```
+
+To sync the Prisma schema changes to the database, you can run:
+
+```bash
+
+npx prisma push
 
 ```
 
