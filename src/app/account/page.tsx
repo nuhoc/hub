@@ -1,9 +1,23 @@
 import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
 import Barcode from '../_components/barcode';
+import { PrismaClient } from '@prisma/client'
+import { now } from "next-auth/client/_utils";
+
 export default async function Account() {
+    const prisma = new PrismaClient()
     const session = await getServerAuthSession();
     const dayPassesLeft = 3; // TODO: Connect some sort of API to get accurate count
+
+    const expiration = await prisma.membership.findFirst({
+        where: {
+            userId: session?.user.id,
+            expiresAt: {
+                gte: new Date(now())
+            }
+        },
+        select: { expiresAt: true }
+    })
 
     return <main className=" sm:pt-16">
         <div className=" flex flex-col gap-16">
@@ -11,7 +25,7 @@ export default async function Account() {
                 <h4>
                     Welcome back, <span className=" text-primary">{`${session.user.name}!`}</span>
                 </h4>
-                <u className=" text-xl">Member until Jun. 2024</u>
+                <u className=" text-xl">{expiration ? `Member until ${expiration.expiresAt.toDateString()}` : "No Active Membership"}</u>
             </div> : <div>
                 <Link href="/api/auth/signin">
                     <h4 className=" underline">
