@@ -32,7 +32,13 @@ export const gearRouter = createTRPCRouter({
         take: showPerPage,
         include: {
           _count: {
-            select: { instances: true },
+            select: {
+              instances: {
+                where: {
+                  rentable: true,
+                },
+              },
+            },
           },
           categories: {
             select: {
@@ -57,7 +63,6 @@ export const gearRouter = createTRPCRouter({
               },
             }
           : {}),
-        // TODO: Paginate/limit results
         // See: https://www.prisma.io/docs/orm/prisma-client/queries/full-text-search#postgresql
         orderBy: {
           _relevance: {
@@ -65,6 +70,60 @@ export const gearRouter = createTRPCRouter({
             search: input.searchTerms,
             sort: input.orderType,
           },
+        },
+      });
+    }),
+
+  checkoutGear: protectedProcedure
+    .input(
+      z.object({
+        gearIds: z.array(z.number()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Get first items of each model and check they are still rentable
+      const instanceIds = await Promise.all(
+        input.gearIds.map(async (gearId) => {
+          const result = await ctx.db.gearInstance.findFirstOrThrow({
+            select: {
+              id: true,
+            },
+            where: {
+              gearModelId: gearId,
+              rentable: true,
+            },
+          });
+
+          return { gearId: result.id };
+        }),
+      );
+
+      // Set all items to reserved/not rentable
+      await ctx.db.gearInstance.updateMany({
+        where: {
+          id: {
+            in: instanceIds.map((instance) => instance.gearId),
+          },
+        },
+        data: {
+          rentable: false,
+        },
+      });
+
+      // Create the rental and connect items and people
+      return ctx.db.rental.create({
+        data: {
+          gearRented: {
+            createMany: {
+              data: instanceIds,
+            },
+          },
+          rentStart: new Date(Date.now()),
+          // TODO: Set to a later date
+          rentDue: new Date(Date.now()),
+          renter: { connect: { id: ctx.session.user.id } },
+          // TODO: Make this someone else besides the renter
+          authorizer: { connect: { id: ctx.session.user.id } },
         },
       });
     }),

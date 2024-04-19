@@ -8,10 +8,17 @@ export default function SearchGear() {
     const [orderType, setOrderType] = useState('desc');
     const [searchTerms, setSearchTerms] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
+    const [cart, setCart] = useState<number[]>([])
+
     const gearMutation = api.gear.getFiltered.useMutation();
+    const checkoutMutation = api.gear.checkoutGear.useMutation();
+
+    const handleParameterizedGearQuery = () => {
+        gearMutation.mutate({ orderType: orderType === 'asc' ? 'asc' : 'desc', page: currentPage, category: category, searchTerms: searchTerms })
+    }
 
     useEffect(() => {
-        gearMutation.mutate({ orderType: orderType === 'asc' ? 'asc' : 'desc', page: currentPage, category: category, searchTerms: searchTerms })
+        handleParameterizedGearQuery()
     }, [category, orderType, searchTerms, currentPage])
 
     const FilterCheckbox = (props: { id: string, label: string }) => {
@@ -22,14 +29,18 @@ export default function SearchGear() {
     }
 
     const handleSetOrderType = (newOrderType: string) => {
+        setCurrentPage(0);
         setOrderType(newOrderType)
     }
 
     const handleSetCategory = (newCategory: string) => {
+        setCurrentPage(0);
         setCategory(newCategory === category ? '' : newCategory)
     }
 
     const handleSetSearchTerms = (newSearchTerms: string) => {
+        setCurrentPage(0);
+
         newSearchTerms = newSearchTerms.trim().split(" ").join(" | ")
         console.log(newSearchTerms)
         setSearchTerms(newSearchTerms)
@@ -39,6 +50,26 @@ export default function SearchGear() {
         if (currentPage + deltaPage >= 0) {
             setCurrentPage(currentPage + deltaPage)
         }
+    }
+
+    const handleAddToCart = (itemId: number) => {
+        setCart([...cart, itemId])
+    }
+
+    const handleRemoveFromCart = (itemId: number) => {
+        setCart(cart.filter(item => item != itemId))
+    }
+
+    const handleCheckout = () => {
+        console.log('checking out')
+        checkoutMutation.mutateAsync({ gearIds: cart })
+            .then(value => console.log(value))
+            .catch(reason => console.error(reason))
+            .finally(() => {
+                handleParameterizedGearQuery()
+                // Clear cart
+                setCart([])
+            })
     }
 
     const CategoryCheckbox = (props: { category: string, label: string }) => {
@@ -51,7 +82,7 @@ export default function SearchGear() {
         </button>
     }
 
-    return <div className=" flex flex-row gap-5">
+    return <div className=" flex flex-col lg:flex-row gap-5">
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
             <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
             <u>Note: The rental period is one week</u>
@@ -84,8 +115,8 @@ export default function SearchGear() {
             </div>
         </div>
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 grow flex flex-col gap-4 items-start justify-between">
-            <div className=' w-full flex flex-col gap-4 items-start'>
-                <div className=" w-full flex flex-row justify-center gap-4">
+            <div className=' w-full flex flex-col gap-4 items-start min-h-[900px]'>
+                <div className=" w-full flex flex-row justify-center gap-4 flex-wrap">
                     <CategoryCheckbox category="tents" label="Tents" />
                     <CategoryCheckbox category="sleep" label="Sleep" />
                     <CategoryCheckbox category="bags" label="Bags" />
@@ -97,45 +128,52 @@ export default function SearchGear() {
                     <option value="asc">Least Relevant</option>
                 </select>
                 <div>{gearMutation?.data ? gearMutation.data.length : '0'} Results</div>
-                <table className=' w-full table-auto divide-y-2 divide-gray-200'>
-                    <thead>
-                        <tr className=' text-left'>
-                            <th className=' p-1'>Brand</th>
-                            <th className=' p-1'>Model</th>
-                            <th className=' p-1'>Available</th>
-                            <th className=' p-1'>Categories</th>
-                            <th className=' p-1'></th>
-                        </tr>
-                    </thead>
-                    <tbody className=' divide-y-2 divide-gray-200'>
-                        {gearMutation.isSuccess ? gearMutation.data.map((item) =>
-                            <tr key={`${item.brand}-${item.model}`}>
-                                <td className=' p-1'>{item.brand}</td>
-                                <td className=' p-1'>{item.model}</td>
-                                <td className=' p-1'>{item._count.instances}</td>
-                                <td className=' p-1'>{item.categories.map(category => category.category.name)}</td>
-                                <td className=' p-1 flex flex-row gap-4 text-primary'>
-                                    <button className=' bg-primary px-2 rounded-sm text-white'>-</button>1<button className=' bg-primary px-2 rounded-sm text-white'>+</button>
-                                </td>
-                            </tr>) :
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td>No results</td>
-                                <td></td>
-                                <td></td>
-                            </tr>}
-                    </tbody>
-                </table>
-                <div className=" w-full flex flex-row justify-center gap-4">
-                    <button onClick={() => handleSetCurrentPage(-1)}>&lt;</button>
-                    <p>{currentPage + 1}</p>
-                    <button onClick={() => handleSetCurrentPage(1)}>&gt;</button>
+                <div className=" w-full overflow-x-auto">
+                    <table className='w-full table-auto divide-y-2 divide-gray-200 text-pretty'>
+                        <thead>
+                            <tr className=' text-left'>
+                                <th className=' p-1'>Brand</th>
+                                <th className=' p-1'>Model</th>
+                                <th className=' p-1'>Quantity</th>
+                                <th className=' p-1'>Categories</th>
+                                <th className=' p-1'></th>
+                            </tr>
+                        </thead>
+                        <tbody className=' divide-y-2 divide-gray-200'>
+                            {gearMutation.isSuccess ? gearMutation.data.map((item) =>
+                                <tr key={`${item.brand}-${item.model}`} className={`h-full ${item._count.instances === 0 ? " text-gray-400" : "text-black"}`}>
+                                    <td className=' p-1 w-2/12'>{item.brand}</td>
+                                    <td className=' p-1 w-3/12'>{item.model}</td>
+                                    <td className=' p-1 w-2/12'>{item._count.instances}</td>
+                                    <td className=' p-1 w-3/12'>{item.categories.map(category => category.category.name)}</td>
+                                    <td className=' p-1 w-1/12 m-auto gap-4 text-primary'>
+                                        {item._count.instances != 0 ? <div className=" h-full">
+                                            {cart.includes(item.id) ?
+                                                <button onClick={() => handleRemoveFromCart(item.id)} className=' bg-secondary w-10 h-10 sm:w-8 sm:h-8 md:w-6 md:h-6 rounded-sm text-white'>-</button> :
+                                                <button onClick={() => handleAddToCart(item.id)} className=' bg-primary w-10 h-10 sm:w-8 sm:h-8 md:w-6 md:h-6 rounded-sm text-white'>+</button>
+                                            }
+                                        </div> : <div></div>}
+                                    </td>
+                                </tr>) :
+                                <tr>
+                                    <td className=" p-1 w-2/12"></td>
+                                    <td className=" p-1 w-3/12"></td>
+                                    <td className=" p-1 w-2/12">No results</td>
+                                    <td className=" p-1 w-3/12"></td>
+                                    <td className=" p-1 w-1/12"></td>
+                                </tr>}
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+            <div className=" w-full flex flex-row justify-center gap-4">
+                <button onClick={() => handleSetCurrentPage(-1)}>&lt;</button>
+                <p>{currentPage + 1}</p>
+                <button onClick={() => handleSetCurrentPage(1)}>&gt;</button>
             </div>
             <div className=" flex flex-row justify-between w-full justify-self-end">
                 <button>View Cart</button>
-                <button>Reserve Gear</button>
+                <button onClick={() => handleCheckout()}>Reserve Gear</button>
             </div>
         </div>
     </div>
