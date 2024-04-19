@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -93,8 +94,8 @@ model Rental {
 }
 
 model GearOnRental {
-  gear   Gear @relation(fields: [gearId], references: [id])
-  gearId Int // relation scalar field (used in the `@relation` attribute above)
+  gear   GearInstance @relation(fields: [gearId], references: [id])
+  gearId String // relation scalar field (used in the `@relation` attribute above)
 
   rental   Rental @relation(fields: [rentalId], references: [id])
   rentalId Int // relation scalar field (used in the `@relation` attribute above)
@@ -102,23 +103,31 @@ model GearOnRental {
   @@id([gearId, rentalId])
 }
 
-model Gear {
+model GearModel {
   id    Int     @id @default(autoincrement())
   brand String?
   model String?
 
-  gearRented GearOnRental[]
   categories CategoriesOnGear[]
+
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  instances GearInstance[]
+}
+
+model GearInstance {
+  id          String    @id @default(cuid())
+  gearModel   GearModel @relation(fields: [gearModelId], references: [id])
+  gearModelId Int
+
+  gearRented GearOnRental[]
 
   notes    String?
   rentable Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model CategoriesOnGear {
-  gear   Gear @relation(fields: [gearId], references: [id])
+  gear   GearModel @relation(fields: [gearId], references: [id])
   gearId Int // relation scalar field (used in the `@relation` attribute above)
 
   category   Category @relation(fields: [categoryId], references: [id])

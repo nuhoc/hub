@@ -23,12 +23,24 @@ export const gearRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.gear.groupBy({
-        by: ["brand", "model"],
-        where: {
-          rentable: true,
-          ...(input.category
-            ? {
+      return ctx.db.gearModel.findMany({
+        include: {
+          _count: {
+            select: { instances: true },
+          },
+          categories: {
+            select: {
+              category: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        ...(input.category
+          ? {
+              where: {
                 categories: {
                   some: {
                     category: {
@@ -36,15 +48,18 @@ export const gearRouter = createTRPCRouter({
                     },
                   },
                 },
-              }
-            : {}),
-        },
+              },
+            }
+          : {}),
         // TODO: Use state to change sorting method
         // TODO: Paginate/limit results
         orderBy: {
-          model: input.orderType,
+          _relevance: {
+            fields: ["brand"],
+            search: "REI",
+            sort: input.orderType,
+          },
         },
-        _count: true,
       });
     }),
 

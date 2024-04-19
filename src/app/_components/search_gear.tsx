@@ -31,7 +31,7 @@ export default function SearchGear() {
         return <button onClick={() => handleSetCategory(props.category)} key={props.category}
             className={` rounded-full outline outline-1 py-2 px-4
             ${category === props.category ?
-                    "outline-primary bg-primary hover:bg-secondary hover:outline-secondary text-white" :
+                    "outline-primary bg-primary hover:text-secondary text-white" :
                     "outline-gray-400 bg-gray-300 hover:bg-white text-black"}`}>
             <p>{props.label}</p>
         </button>
@@ -89,7 +89,7 @@ export default function SearchGear() {
                             <th className=' p-1'>Brand</th>
                             <th className=' p-1'>Model</th>
                             <th className=' p-1'>Available</th>
-                            <th className=' p-1'>Tags</th>
+                            <th className=' p-1'>Categories</th>
                             <th className=' p-1'></th>
                         </tr>
                     </thead>
@@ -98,8 +98,8 @@ export default function SearchGear() {
                             <tr key={`${item.brand}-${item.model}`}>
                                 <td className=' p-1'>{item.brand}</td>
                                 <td className=' p-1'>{item.model}</td>
-                                <td className=' p-1'>{item._count}</td>
-                                <td className=' p-1'>placeholder</td>
+                                <td className=' p-1'>{item._count.instances}</td>
+                                <td className=' p-1'>{item.categories.map(category => category.category.name)}</td>
                                 <td className=' p-1 flex flex-row gap-4 text-primary'>
                                     <button className=' bg-primary px-2 rounded-sm text-white'>-</button>1<button className=' bg-primary px-2 rounded-sm text-white'>+</button>
                                 </td>
