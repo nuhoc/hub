@@ -20,6 +20,7 @@ export const gearRouter = createTRPCRouter({
       z.object({
         orderType: z.enum(["asc", "desc"]),
         category: z.string().optional(),
+        searchTerms: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -55,8 +56,8 @@ export const gearRouter = createTRPCRouter({
         // TODO: Paginate/limit results
         orderBy: {
           _relevance: {
-            fields: ["brand"],
-            search: "REI",
+            fields: ["brand", "model"],
+            search: input.searchTerms,
             sort: input.orderType,
           },
         },

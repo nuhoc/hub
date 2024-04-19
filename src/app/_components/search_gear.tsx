@@ -5,12 +5,13 @@ import { api } from "~/trpc/react";
 
 export default function SearchGear() {
     const [category, setCategory] = useState('');
-    const [orderType, setOrderType] = useState('asc');
+    const [orderType, setOrderType] = useState('desc');
+    const [searchTerms, setSearchTerms] = useState('');
     const gearMutation = api.gear.getFiltered.useMutation();
 
     useEffect(() => {
-        gearMutation.mutate({ orderType: orderType === 'asc' ? 'asc' : 'desc', category: category })
-    }, [category, orderType])
+        gearMutation.mutate({ orderType: orderType === 'asc' ? 'asc' : 'desc', category: category, searchTerms: searchTerms })
+    }, [category, orderType, searchTerms])
 
     const FilterCheckbox = (props: { id: string, label: string }) => {
         return <div className=" flex flex-row gap-2">
@@ -27,6 +28,12 @@ export default function SearchGear() {
         setCategory(newCategory === category ? '' : newCategory)
     }
 
+    const handleSetSearchTerms = (newSearchTerms: string) => {
+        newSearchTerms = newSearchTerms.trim().split(" ").join(" | ")
+        console.log(newSearchTerms)
+        setSearchTerms(newSearchTerms)
+    }
+
     const CategoryCheckbox = (props: { category: string, label: string }) => {
         return <button onClick={() => handleSetCategory(props.category)} key={props.category}
             className={` rounded-full outline outline-1 py-2 px-4
@@ -39,7 +46,7 @@ export default function SearchGear() {
 
     return <div className=" flex flex-row gap-5">
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
-            <input className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
+            <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
             <u>Note: The rental period is one week</u>
             <h4>Filters</h4>
             <div>
@@ -79,8 +86,8 @@ export default function SearchGear() {
                     <CategoryCheckbox category="snow" label="Snow" />
                 </div>
                 <select onChange={e => handleSetOrderType(e.target.value)} name="sort" id="sort" className=" bg-gray-300 hover:bg-white outline outline-1 outline-gray-400 py-2 px-4 text-left rounded-lg">
-                    <option value="asc">Sort by: Ascending</option>
-                    <option value="desc">Sort by: Descending</option>
+                    <option value="desc">Most Relevant</option>
+                    <option value="asc">Least Relevant</option>
                 </select>
                 <div>{gearMutation?.data ? gearMutation.data.length : '0'} Results</div>
                 <table className=' w-full table-auto divide-y-2 divide-gray-200'>
