@@ -7,11 +7,12 @@ export default function SearchGear() {
     const [category, setCategory] = useState('');
     const [orderType, setOrderType] = useState('desc');
     const [searchTerms, setSearchTerms] = useState('');
+    const [currentPage, setCurrentPage] = useState(0);
     const gearMutation = api.gear.getFiltered.useMutation();
 
     useEffect(() => {
-        gearMutation.mutate({ orderType: orderType === 'asc' ? 'asc' : 'desc', category: category, searchTerms: searchTerms })
-    }, [category, orderType, searchTerms])
+        gearMutation.mutate({ orderType: orderType === 'asc' ? 'asc' : 'desc', page: currentPage, category: category, searchTerms: searchTerms })
+    }, [category, orderType, searchTerms, currentPage])
 
     const FilterCheckbox = (props: { id: string, label: string }) => {
         return <div className=" flex flex-row gap-2">
@@ -32,6 +33,12 @@ export default function SearchGear() {
         newSearchTerms = newSearchTerms.trim().split(" ").join(" | ")
         console.log(newSearchTerms)
         setSearchTerms(newSearchTerms)
+    }
+
+    const handleSetCurrentPage = (deltaPage: number) => {
+        if (currentPage + deltaPage >= 0) {
+            setCurrentPage(currentPage + deltaPage)
+        }
     }
 
     const CategoryCheckbox = (props: { category: string, label: string }) => {
@@ -120,9 +127,10 @@ export default function SearchGear() {
                             </tr>}
                     </tbody>
                 </table>
-                <div className=" w-full flex flex-row justify-center">
-                    <div>&lt;</div>
-                    <div>&gt;</div>
+                <div className=" w-full flex flex-row justify-center gap-4">
+                    <button onClick={() => handleSetCurrentPage(-1)}>&lt;</button>
+                    <p>{currentPage + 1}</p>
+                    <button onClick={() => handleSetCurrentPage(1)}>&gt;</button>
                 </div>
             </div>
             <div className=" flex flex-row justify-between w-full justify-self-end">

@@ -19,12 +19,17 @@ export const gearRouter = createTRPCRouter({
     .input(
       z.object({
         orderType: z.enum(["asc", "desc"]),
+        page: z.number(),
         category: z.string().optional(),
         searchTerms: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const showPerPage = 10;
+      const skipAmount = showPerPage * input.page;
       return ctx.db.gearModel.findMany({
+        skip: skipAmount,
+        take: showPerPage,
         include: {
           _count: {
             select: { instances: true },
@@ -52,8 +57,8 @@ export const gearRouter = createTRPCRouter({
               },
             }
           : {}),
-        // TODO: Use state to change sorting method
         // TODO: Paginate/limit results
+        // See: https://www.prisma.io/docs/orm/prisma-client/queries/full-text-search#postgresql
         orderBy: {
           _relevance: {
             fields: ["brand", "model"],
