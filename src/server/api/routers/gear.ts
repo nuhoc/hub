@@ -53,7 +53,7 @@ export const gearRouter = createTRPCRouter({
         where: {
           instances: {
             every: {
-              gearRented: {
+              gearRental: {
                 every: {
                   rental: {
                     rentReturn: {
@@ -123,7 +123,6 @@ export const gearRouter = createTRPCRouter({
             },
           },
           rentStart: startDate,
-          // TODO: Set to a later date
           rentDue: dueDate,
           renter: { connect: { id: ctx.session.user.id } },
           // TODO: Make this someone else besides the renter
