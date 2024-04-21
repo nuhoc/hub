@@ -22,6 +22,8 @@ export const gearRouter = createTRPCRouter({
         page: z.number(),
         category: z.string().optional(),
         searchTerms: z.string(),
+        startDate: z.string(),
+        endDate: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -39,8 +41,13 @@ export const gearRouter = createTRPCRouter({
                   gearRental: {
                     every: {
                       rental: {
-                        rentReturn: {
-                          not: null,
+                        NOT: {
+                          rentStart: {
+                            lte: new Date(input.endDate),
+                          },
+                          rentDue: {
+                            gte: new Date(input.startDate),
+                          },
                         },
                       },
                     },
@@ -87,6 +94,8 @@ export const gearRouter = createTRPCRouter({
     .input(
       z.object({
         gearIds: z.array(z.number()),
+        startDate: z.string(),
+        endDate: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -114,8 +123,13 @@ export const gearRouter = createTRPCRouter({
               gearRental: {
                 every: {
                   rental: {
-                    rentReturn: {
-                      not: null,
+                    NOT: {
+                      rentStart: {
+                        lte: new Date(input.endDate),
+                      },
+                      rentDue: {
+                        gte: new Date(input.startDate),
+                      },
                     },
                   },
                 },
@@ -128,9 +142,6 @@ export const gearRouter = createTRPCRouter({
       );
 
       // Create the rental and connect items and people
-      const startDate = new Date(Date.now());
-      const dueDate = new Date();
-      dueDate.setDate(startDate.getDate() + 7);
       return ctx.db.rental.create({
         data: {
           gearRented: {
@@ -138,8 +149,8 @@ export const gearRouter = createTRPCRouter({
               data: instanceIds,
             },
           },
-          rentStart: startDate,
-          rentDue: dueDate,
+          rentStart: new Date(input.startDate),
+          rentDue: new Date(input.endDate),
           renter: { connect: { id: ctx.session.user.id } },
           // TODO: Make this someone else besides the renter
           authorizer: { connect: { id: ctx.session.user.id } },

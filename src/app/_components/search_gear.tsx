@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import { start } from "repl";
 import { api } from "~/trpc/react";
 
 export default function SearchGear() {
@@ -8,19 +9,27 @@ export default function SearchGear() {
     const [orderType, setOrderType] = useState('desc');
     const [searchTerms, setSearchTerms] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
-    const [startDate, setStartDate] = useState(new Date(Date.now()).toISOString().split('T')[0])
+    const [startDate, setStartDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
+    const [endDate, setEndDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
     const [cart, setCart] = useState<number[]>([])
 
     const gearMutation = api.gear.getFiltered.useMutation();
     const checkoutMutation = api.gear.checkoutGear.useMutation();
 
     const handleParameterizedGearQuery = () => {
-        gearMutation.mutate({ orderType: orderType === 'asc' ? 'asc' : 'desc', page: currentPage, category: category, searchTerms: searchTerms })
+        gearMutation.mutate({
+            orderType: orderType === 'asc' ? 'asc' : 'desc',
+            page: currentPage,
+            category: category,
+            searchTerms: searchTerms,
+            startDate: startDate,
+            endDate: endDate,
+        })
     }
 
     useEffect(() => {
         handleParameterizedGearQuery()
-    }, [category, orderType, searchTerms, currentPage])
+    }, [category, orderType, searchTerms, currentPage, startDate, endDate])
 
     const FilterCheckbox = (props: { id: string, label: string }) => {
         return <div className=" flex flex-row gap-2">
@@ -61,9 +70,31 @@ export default function SearchGear() {
         setCart(cart.filter(item => item != itemId))
     }
 
+    const handleSetStartDate = (newStartDate: string) => {
+        setCurrentPage(0);
+        setCart([])
+
+        if (newStartDate > endDate) {
+            setEndDate(newStartDate)
+        }
+
+        setStartDate(newStartDate)
+    }
+
+    const handleSetEndDate = (newEndDate: string) => {
+        setCurrentPage(0);
+        setCart([])
+
+        if (startDate > newEndDate) {
+            setEndDate(newEndDate)
+        }
+
+        setEndDate(newEndDate)
+    }
+
     const handleCheckout = () => {
         console.log('checking out')
-        checkoutMutation.mutateAsync({ gearIds: cart })
+        checkoutMutation.mutateAsync({ gearIds: cart, startDate: startDate, endDate: endDate })
             .then(value => console.log(value))
             .catch(reason => console.error(reason))
             .finally(() => {
@@ -86,14 +117,26 @@ export default function SearchGear() {
     const todayDate = new Date(Date.now())
     const todayDateString = todayDate.toISOString().split('T')[0]
     // Reserve max one weeks in advance
-    const maxDate = new Date();
-    maxDate.setDate(todayDate.getDate() + 7);
-    const maxDateString = maxDate.toISOString().split('T')[0]
+    const maxStartDate = new Date(Date.now());
+    maxStartDate.setDate(todayDate.getDate() + 7);
+    const maxStartDateString = maxStartDate.toISOString().split('T')[0]
+
+    const maxEndDate = new Date(startDate);
+    maxEndDate.setDate(maxEndDate.getDate() + 7);
+    const maxEndDateString = maxEndDate.toISOString().split('T')[0]
+
 
     return <div className=" flex flex-col lg:flex-row gap-5">
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
             <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
-            <input onChange={e => setStartDate(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" value={startDate} min={todayDateString} max={maxDateString} type="date" />
+            <div className=" flex flex-col gap-1">
+                <label htmlFor="start"><strong>Start date:</strong></label>
+                <input id="start" onChange={e => handleSetStartDate(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" value={startDate} min={todayDateString} max={maxStartDateString} type="date" />
+            </div>
+            <div className=" flex flex-col gap-1">
+                <label htmlFor="end"><strong>End date:</strong></label>
+                <input id="end" onChange={e => handleSetEndDate(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" value={endDate} min={startDate} max={maxEndDateString} type="date" />
+            </div>
             <u>Note: The rental period is one week</u>
             <h4>Filters</h4>
             <div>
