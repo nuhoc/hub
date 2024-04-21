@@ -8,6 +8,7 @@ export default function SearchGear() {
     const [orderType, setOrderType] = useState('desc');
     const [searchTerms, setSearchTerms] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
+    const [startDate, setStartDate] = useState(new Date(Date.now()).toISOString().split('T')[0])
     const [cart, setCart] = useState<number[]>([])
 
     const gearMutation = api.gear.getFiltered.useMutation();
@@ -82,9 +83,17 @@ export default function SearchGear() {
         </button>
     }
 
+    const todayDate = new Date(Date.now())
+    const todayDateString = todayDate.toISOString().split('T')[0]
+    // Reserve max one weeks in advance
+    const maxDate = new Date();
+    maxDate.setDate(todayDate.getDate() + 7);
+    const maxDateString = maxDate.toISOString().split('T')[0]
+
     return <div className=" flex flex-col lg:flex-row gap-5">
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
             <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
+            <input onChange={e => setStartDate(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" value={startDate} min={todayDateString} max={maxDateString} type="date" />
             <u>Note: The rental period is one week</u>
             <h4>Filters</h4>
             <div>
