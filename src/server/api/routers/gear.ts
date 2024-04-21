@@ -50,9 +50,22 @@ export const gearRouter = createTRPCRouter({
             },
           },
         },
-        ...(input.category
-          ? {
-              where: {
+        where: {
+          instances: {
+            every: {
+              gearRented: {
+                every: {
+                  rental: {
+                    rentReturn: {
+                      not: null,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          ...(input.category
+            ? {
                 categories: {
                   some: {
                     category: {
@@ -60,9 +73,9 @@ export const gearRouter = createTRPCRouter({
                     },
                   },
                 },
-              },
-            }
-          : {}),
+              }
+            : {}),
+        },
         // See: https://www.prisma.io/docs/orm/prisma-client/queries/full-text-search#postgresql
         orderBy: {
           _relevance: {
@@ -98,19 +111,10 @@ export const gearRouter = createTRPCRouter({
         }),
       );
 
-      // Set all items to reserved/not rentable
-      await ctx.db.gearInstance.updateMany({
-        where: {
-          id: {
-            in: instanceIds.map((instance) => instance.gearId),
-          },
-        },
-        data: {
-          rentable: false,
-        },
-      });
-
       // Create the rental and connect items and people
+      const startDate = new Date(Date.now());
+      const dueDate = new Date();
+      dueDate.setDate(startDate.getDate() + 7);
       return ctx.db.rental.create({
         data: {
           gearRented: {
@@ -118,9 +122,9 @@ export const gearRouter = createTRPCRouter({
               data: instanceIds,
             },
           },
-          rentStart: new Date(Date.now()),
+          rentStart: startDate,
           // TODO: Set to a later date
-          rentDue: new Date(Date.now()),
+          rentDue: dueDate,
           renter: { connect: { id: ctx.session.user.id } },
           // TODO: Make this someone else besides the renter
           authorizer: { connect: { id: ctx.session.user.id } },
