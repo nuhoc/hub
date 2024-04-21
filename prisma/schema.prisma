@@ -17,13 +17,10 @@ datasource db {
 
 model Membership {
   id        Int      @id @default(autoincrement())
-  name      String
   createdAt DateTime @default(now())
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id])
   userId    String
-
-  @@index([name])
 }
 
 // Necessary for Next auth
