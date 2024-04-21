@@ -120,7 +120,7 @@ model GearInstance {
   gearModel   GearModel @relation(fields: [gearModelId], references: [id])
   gearModelId Int
 
-  gearRented GearOnRental[]
+  gearRental GearOnRental[]
 
   notes    String?
   rentable Boolean @default(true)

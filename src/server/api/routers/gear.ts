@@ -53,7 +53,7 @@ export const gearRouter = createTRPCRouter({
         where: {
           instances: {
             every: {
-              gearRented: {
+              gearRental: {
                 every: {
                   rental: {
                     rentReturn: {
