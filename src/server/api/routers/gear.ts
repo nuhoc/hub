@@ -36,6 +36,15 @@ export const gearRouter = createTRPCRouter({
               instances: {
                 where: {
                   rentable: true,
+                  gearRental: {
+                    every: {
+                      rental: {
+                        rentReturn: {
+                          not: null,
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -51,19 +60,6 @@ export const gearRouter = createTRPCRouter({
           },
         },
         where: {
-          instances: {
-            every: {
-              gearRental: {
-                every: {
-                  rental: {
-                    rentReturn: {
-                      not: null,
-                    },
-                  },
-                },
-              },
-            },
-          },
           ...(input.category
             ? {
                 categories: {
@@ -94,6 +90,16 @@ export const gearRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Check that they have an active membership, if not throw error
+      await ctx.db.membership.findFirstOrThrow({
+        where: {
+          userId: ctx.session.user.id,
+          expiresAt: {
+            gte: new Date(Date.now()),
+          },
+        },
+      });
+
       // Get first items of each model and check they are still rentable
       const instanceIds = await Promise.all(
         input.gearIds.map(async (gearId) => {
@@ -104,6 +110,16 @@ export const gearRouter = createTRPCRouter({
             where: {
               gearModelId: gearId,
               rentable: true,
+              // Make sure the gear instance is not in an active rental
+              gearRental: {
+                every: {
+                  rental: {
+                    rentReturn: {
+                      not: null,
+                    },
+                  },
+                },
+              },
             },
           });
 
