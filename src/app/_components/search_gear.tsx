@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { start } from "repl";
 import { api } from "~/trpc/react";
+import 'react-responsive-modal/styles.css';
+import { Modal } from 'react-responsive-modal'
 
 export default function SearchGear() {
     const [category, setCategory] = useState('');
@@ -13,11 +14,17 @@ export default function SearchGear() {
     const [endDate, setEndDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
     const [cart, setCart] = useState<number[]>([])
 
+    const [open, setOpen] = useState(false);
+    const [modalInfo, setModalInfo] = useState({ title: "Title", body: "body" })
+
+    const onOpenModal = () => setOpen(true);
+    const onCloseModal = () => setOpen(false);
+
     const gearMutation = api.gear.getFiltered.useMutation();
     const checkoutMutation = api.gear.checkoutGear.useMutation();
 
     const handleParameterizedGearQuery = () => {
-        gearMutation.mutate({
+        gearMutation.mutateAsync({
             orderType: orderType === 'asc' ? 'asc' : 'desc',
             page: currentPage,
             category: category,
@@ -25,6 +32,13 @@ export default function SearchGear() {
             startDate: startDate,
             endDate: endDate,
         })
+            .then(() => console.log("success"))
+            .catch((reason) => {
+                console.error(reason)
+                setModalInfo({ title: "Uh oh, an error happened", body: "Error querying gear" })
+                onOpenModal()
+
+            })
     }
 
     useEffect(() => {
@@ -95,8 +109,18 @@ export default function SearchGear() {
     const handleCheckout = () => {
         console.log('checking out')
         checkoutMutation.mutateAsync({ gearIds: cart, startDate: startDate, endDate: endDate })
-            .then(value => console.log(value))
-            .catch(reason => console.error(reason))
+            .then(value => {
+                console.log(value)
+                setModalInfo({ title: "Checkout successful!", body: `Reservation #${value.id}. Return by ${value.rentDue.toDateString()}` })
+                onOpenModal()
+
+            })
+            .catch(reason => {
+                console.error(reason)
+                setModalInfo({ title: "Uh oh, an error happened", body: `${reason}` })
+                onOpenModal()
+                // TODO: Remove unavailable items from cart instead of all
+            })
             .finally(() => {
                 handleParameterizedGearQuery()
                 // Clear cart
@@ -127,7 +151,15 @@ export default function SearchGear() {
 
 
     return <div className=" flex flex-col lg:flex-row gap-5">
+        <Modal open={open} onClose={onCloseModal} center classNames={{ modal: "rounded-lg" }}>
+            <div className=" pt-10 p-4 rounded-lg flex flex-col gap-4">
+                <h4>{modalInfo.title}</h4>
+                <p>{modalInfo.body}</p>
+                <button className=" self-end" onClick={onCloseModal}>Dismiss</button>
+            </div>
+        </Modal>
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
+            <button onClick={onOpenModal}>Open modal</button>
             <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
             <div className=" flex flex-col gap-1">
                 <label htmlFor="start"><strong>Start date:</strong></label>
