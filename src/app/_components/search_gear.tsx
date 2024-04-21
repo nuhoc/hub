@@ -15,7 +15,7 @@ export default function SearchGear() {
     const [cart, setCart] = useState<number[]>([])
 
     const [open, setOpen] = useState(false);
-    const [modalInfo, setModalInfo] = useState({ title: "Title", body: "body" })
+    const [modalInfo, setModalInfo] = useState({ title: "Title", titleStyle: '', body: "body", bodyStyle: '' })
 
     const onOpenModal = () => setOpen(true);
     const onCloseModal = () => setOpen(false);
@@ -35,7 +35,7 @@ export default function SearchGear() {
             .then(() => console.log("success"))
             .catch((reason) => {
                 console.error(reason)
-                setModalInfo({ title: "Uh oh, an error happened", body: "Error querying gear" })
+                setModalInfo({ title: "Uh oh, an error happened", titleStyle: "text-secondary", body: "Error querying gear", bodyStyle: "" })
                 onOpenModal()
 
             })
@@ -111,13 +111,13 @@ export default function SearchGear() {
         checkoutMutation.mutateAsync({ gearIds: cart, startDate: startDate, endDate: endDate })
             .then(value => {
                 console.log(value)
-                setModalInfo({ title: "Checkout successful!", body: `Reservation #${value.id}. Return by ${value.rentDue.toDateString()}` })
+                setModalInfo({ title: "Checkout successful!", titleStyle: " text-primary", body: `Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`, bodyStyle: "" })
                 onOpenModal()
 
             })
             .catch(reason => {
                 console.error(reason)
-                setModalInfo({ title: "Uh oh, an error happened", body: `${reason}` })
+                setModalInfo({ title: "Uh oh, an error happened", titleStyle: " text-secondary", body: `${reason}`, bodyStyle: "" })
                 onOpenModal()
                 // TODO: Remove unavailable items from cart instead of all
             })
@@ -153,8 +153,8 @@ export default function SearchGear() {
     return <div className=" flex flex-col lg:flex-row gap-5">
         <Modal open={open} onClose={onCloseModal} center classNames={{ modal: "rounded-lg" }}>
             <div className=" pt-10 p-4 rounded-lg flex flex-col gap-4">
-                <h4>{modalInfo.title}</h4>
-                <p>{modalInfo.body}</p>
+                <h4 className={modalInfo.titleStyle}>{modalInfo.title}</h4>
+                <p className={modalInfo.bodyStyle}>{modalInfo.body}</p>
                 <button className=" self-end" onClick={onCloseModal}>Dismiss</button>
             </div>
         </Modal>
