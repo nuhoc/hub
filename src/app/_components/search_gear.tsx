@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import 'react-responsive-modal/styles.css';
 import { Modal } from 'react-responsive-modal'
@@ -15,7 +15,7 @@ export default function SearchGear() {
     const [cart, setCart] = useState<number[]>([])
 
     const [open, setOpen] = useState(false);
-    const [modalInfo, setModalInfo] = useState({ title: "Title", titleStyle: '', body: "body", bodyStyle: '' })
+    const [modalInfo, setModalInfo] = useState<ReactElement>(<div></div>)
 
     const onOpenModal = () => setOpen(true);
     const onCloseModal = () => setOpen(false);
@@ -35,7 +35,11 @@ export default function SearchGear() {
             .then(() => console.log("success"))
             .catch((reason) => {
                 console.error(reason)
-                setModalInfo({ title: "Uh oh, an error happened", titleStyle: "text-secondary", body: "Error querying gear", bodyStyle: "" })
+                setModalInfo(
+                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
+                        <h4 className="text-secondary">Uh oh, an error happened</h4>
+                        <p>Error querying gear</p>
+                    </div>)
                 onOpenModal()
 
             })
@@ -111,13 +115,23 @@ export default function SearchGear() {
         checkoutMutation.mutateAsync({ gearIds: cart, startDate: startDate, endDate: endDate })
             .then(value => {
                 console.log(value)
-                setModalInfo({ title: "Checkout successful!", titleStyle: " text-primary", body: `Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`, bodyStyle: "" })
+                setModalInfo(
+                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
+                        <h4 className="text-secondary">Checkout successful!</h4>
+                        <p>{`Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`}</p>
+                    </div>)
+
                 onOpenModal()
 
             })
             .catch(reason => {
                 console.error(reason)
-                setModalInfo({ title: "Uh oh, an error happened", titleStyle: " text-secondary", body: `${reason}`, bodyStyle: "" })
+                setModalInfo(
+                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
+                        <h4 className="text-secondary">Uh oh, an error happened</h4>
+                        <p>{`${reason}`}</p>
+                    </div>)
+
                 onOpenModal()
                 // TODO: Remove unavailable items from cart instead of all
             })
@@ -126,6 +140,24 @@ export default function SearchGear() {
                 // Clear cart
                 setCart([])
             })
+    }
+
+    const handleViewCart = () => {
+        if (gearMutation.isSuccess) {
+            const cartItems = gearMutation.data.map(value => {
+                if (cart.includes(value.id)) return <li key={value.id}>{value.brand} {value.model}</li>
+            })
+
+            setModalInfo(
+                <div className="pt-10 p-4 rounded-lg flex flex-col gap-4 ">
+                    <h4>Current Cart</h4>
+                    {cartItems.length != 0 ?
+                        <ol className="list-disc">{...cartItems}</ol> :
+                        <p>Looks like you havent added anything yet, try pressing the plus sign!</p>
+                    }
+                </div>)
+            onOpenModal()
+        }
     }
 
     const CategoryCheckbox = (props: { category: string, label: string }) => {
@@ -141,6 +173,7 @@ export default function SearchGear() {
     const todayDate = new Date(Date.now())
     const todayDateString = todayDate.toISOString().split('T')[0]
     // Reserve max one weeks in advance
+    // TODO: Allow overrides for admins
     const maxStartDate = new Date(Date.now());
     maxStartDate.setDate(todayDate.getDate() + 7);
     const maxStartDateString = maxStartDate.toISOString().split('T')[0]
@@ -153,13 +186,11 @@ export default function SearchGear() {
     return <div className=" flex flex-col lg:flex-row gap-5">
         <Modal open={open} onClose={onCloseModal} center classNames={{ modal: "rounded-lg" }}>
             <div className=" pt-10 p-4 rounded-lg flex flex-col gap-4">
-                <h4 className={modalInfo.titleStyle}>{modalInfo.title}</h4>
-                <p className={modalInfo.bodyStyle}>{modalInfo.body}</p>
+                {modalInfo}
                 <button className=" self-end" onClick={onCloseModal}>Dismiss</button>
             </div>
         </Modal>
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
-            <button onClick={onOpenModal}>Open modal</button>
             <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
             <div className=" flex flex-col gap-1">
                 <label htmlFor="start"><strong>Start date:</strong></label>
@@ -224,7 +255,7 @@ export default function SearchGear() {
                             </tr>
                         </thead>
                         <tbody className=' divide-y-2 divide-gray-200'>
-                            {gearMutation.isSuccess ? gearMutation.data.map((item) =>
+                            {gearMutation.isSuccess && gearMutation.data.length != 0 ? gearMutation.data.map((item) =>
                                 <tr key={`${item.brand}-${item.model}`} className={`h-full ${item._count.instances === 0 ? " text-gray-400" : "text-black"}`}>
                                     <td className=' p-1 w-2/12'>{item.brand}</td>
                                     <td className=' p-1 w-3/12'>{item.model}</td>
@@ -242,12 +273,17 @@ export default function SearchGear() {
                                 <tr>
                                     <td className=" p-1 w-2/12"></td>
                                     <td className=" p-1 w-3/12"></td>
-                                    <td className=" p-1 w-2/12">No results</td>
+                                    <td className=" p-1 w-2/12"></td>
                                     <td className=" p-1 w-3/12"></td>
                                     <td className=" p-1 w-1/12"></td>
                                 </tr>}
                         </tbody>
                     </table>
+                    {gearMutation.isSuccess && gearMutation.data.length == 0 &&
+                        <div className=" text-center p-12">
+                            <h5>No results</h5>
+                            <p>Try removing filters or use different search phrases.</p>
+                        </div>}
                 </div>
             </div>
             <div className=" w-full flex flex-row justify-center gap-4">
@@ -256,8 +292,8 @@ export default function SearchGear() {
                 <button onClick={() => handleSetCurrentPage(1)}>&gt;</button>
             </div>
             <div className=" flex flex-row justify-between w-full justify-self-end">
-                <button>View Cart</button>
-                <button onClick={() => handleCheckout()}>Reserve Gear</button>
+                <button onClick={() => handleViewCart()} className=" bg-gray-300 hover:bg-white outline outline-1 outline-gray-400 py-2 px-4 text-left rounded-lg">View Cart</button>
+                <button onClick={() => handleCheckout()} className=" bg-primary hover:text-secondary text-white py-2 px-4 text-left rounded-lg">Reserve Gear</button>
             </div>
         </div>
     </div>
