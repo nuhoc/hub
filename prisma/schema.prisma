@@ -2,8 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -17,10 +16,13 @@ datasource db {
 
 model Membership {
   id        Int      @id @default(autoincrement())
+  name      String
   createdAt DateTime @default(now())
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id])
   userId    String
+
+  @@index([name])
 }
 
 // Necessary for Next auth
@@ -91,8 +93,8 @@ model Rental {
 }
 
 model GearOnRental {
-  gear   GearInstance @relation(fields: [gearId], references: [id])
-  gearId String // relation scalar field (used in the `@relation` attribute above)
+  gear   Gear @relation(fields: [gearId], references: [id])
+  gearId Int // relation scalar field (used in the `@relation` attribute above)
 
   rental   Rental @relation(fields: [rentalId], references: [id])
   rentalId Int // relation scalar field (used in the `@relation` attribute above)
@@ -100,31 +102,23 @@ model GearOnRental {
   @@id([gearId, rentalId])
 }
 
-model GearModel {
+model Gear {
   id    Int     @id @default(autoincrement())
   brand String?
   model String?
 
+  gearRented GearOnRental[]
   categories CategoriesOnGear[]
-
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  instances GearInstance[]
-}
-
-model GearInstance {
-  id          String    @id @default(cuid())
-  gearModel   GearModel @relation(fields: [gearModelId], references: [id])
-  gearModelId Int
-
-  gearRental GearOnRental[]
 
   notes    String?
   rentable Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CategoriesOnGear {
-  gear   GearModel @relation(fields: [gearId], references: [id])
+  gear   Gear @relation(fields: [gearId], references: [id])
   gearId Int // relation scalar field (used in the `@relation` attribute above)
 
   category   Category @relation(fields: [categoryId], references: [id])

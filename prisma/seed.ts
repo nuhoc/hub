@@ -4,28 +4,54 @@ const prisma = new PrismaClient();
 
 async function main() {
   const categories = await prisma.category.createMany({
-    data: [{ name: "sleep" }, { name: "climb" }, { name: "bags" }],
+    data: [
+      { id: 1, name: "Sleeping Bag" },
+      { id: 2, name: "Backpack" },
+      { id: 3, name: "Climbing" },
+    ],
     skipDuplicates: true,
   });
-  const newGear = await prisma.gearModel.createMany({
+  const newGear = await prisma.gear.createMany({
     data: [
-      { brand: "REI", model: "Zephyr 25 Sleeping Bag" },
-      { brand: "Mountain Hardwear", model: "Bishop Pass 0 Sleeping Bag" },
-      { brand: "Black Diamond", model: "MiniWire Carabiner" },
-      { brand: "Black Diamond", model: "9.9mm Non-Dry Rope" },
+      { id: 1, brand: "REI", model: "Zephyr 25 Sleeping Bag" },
+      { id: 2, brand: "REI", model: "Zephyr 25 Sleeping Bag" },
       {
-        brand: "Black Diamond",
-        model: "Distance Carbon Z Trekking/Running Poles",
+        id: 3,
+        brand: "REI",
+        model: "Zephyr 25 Sleeping Bag",
+        notes: "Broken zipper",
       },
-      { brand: "Black Diamond", model: "Men's Method S Climbing Shoes" },
-      { brand: "Black Diamond", model: "Astro 300 Headlamp" },
-      { brand: "Generic/Unknown", model: "Climbing Shoes" },
-      { brand: "Generic/Unknown", model: "Headlamp" },
-      { brand: "Generic/Unknown", model: "Tent" },
-      { brand: "Generic/Unknown", model: "Inflatable Kayak" },
-      { brand: "Therm-a-Rest", model: "Z Lite Sol Sleeping Pad" },
-      { brand: "Therm-a-Rest", model: "Parsec 32 Sleeping Bag" },
-      { brand: "Therm-a-Rest", model: "Compressible Pillow" },
+      {
+        id: 4,
+        brand: "Mountain Hardwear",
+        model: "Bishop Pass 0 Sleeping Bag",
+      },
+      {
+        id: 5,
+        brand: "Mountain Hardwear",
+        model: "Bishop Pass 0 Sleeping Bag",
+      },
+      { id: 6, brand: "Black Diamond", model: "MiniWire Carabiner" },
+      { id: 7, brand: "Black Diamond", model: "MiniWire Carabiner" },
+      {
+        id: 8,
+        brand: "Black Diamond",
+        model: "MiniWire Carabiner",
+        rentable: false,
+      },
+      {
+        id: 9,
+        brand: "Black Diamond",
+        model: "MiniWire Carabiner",
+        rentable: false,
+      },
+      {
+        id: 10,
+        brand: "Black Diamond",
+        model: "9.9mm Non-Dry Rope",
+        notes: "Retired",
+        rentable: false,
+      },
     ],
     skipDuplicates: true,
   });
@@ -33,27 +59,18 @@ async function main() {
     data: [
       { gearId: 1, categoryId: 1 },
       { gearId: 2, categoryId: 1 },
-      { gearId: 3, categoryId: 2 },
-      { gearId: 4, categoryId: 2 },
+      { gearId: 3, categoryId: 1 },
+      { gearId: 4, categoryId: 1 },
+      { gearId: 5, categoryId: 1 },
+      { gearId: 6, categoryId: 3 },
+      { gearId: 7, categoryId: 3 },
+      { gearId: 8, categoryId: 3 },
+      { gearId: 9, categoryId: 3 },
+      { gearId: 10, categoryId: 3 },
     ],
     skipDuplicates: true,
   });
-
-  const gearInstances = await prisma.gearInstance.createMany({
-    data: [
-      { gearModelId: 1 },
-      { gearModelId: 1 },
-      { gearModelId: 1 },
-      { gearModelId: 2 },
-      { gearModelId: 2 },
-      { gearModelId: 2 },
-      { gearModelId: 2 },
-      { gearModelId: 3 },
-      { gearModelId: 3 },
-      { gearModelId: 4 },
-    ],
-  });
-  console.log({ categories, newGear, gearCategories, gearInstances });
+  console.log({ categories, newGear, gearCategories });
 }
 main()
   .then(async () => {
