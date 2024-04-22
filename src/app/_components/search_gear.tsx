@@ -12,7 +12,7 @@ export default function SearchGear() {
     const [currentPage, setCurrentPage] = useState(0);
     const [startDate, setStartDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
     const [endDate, setEndDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
-    const [cart, setCart] = useState<number[]>([])
+    const [cart, setCart] = useState<{ id: number, label: string }[]>([])
 
     const [open, setOpen] = useState(false);
     const [modalInfo, setModalInfo] = useState<ReactElement>(<div></div>)
@@ -80,12 +80,12 @@ export default function SearchGear() {
         }
     }
 
-    const handleAddToCart = (itemId: number) => {
-        setCart([...cart, itemId])
+    const handleAddToCart = (itemId: number, itemLabel: string) => {
+        setCart([...cart, { id: itemId, label: itemLabel }])
     }
 
     const handleRemoveFromCart = (itemId: number) => {
-        setCart(cart.filter(item => item != itemId))
+        setCart(cart.filter(item => item.id != itemId))
     }
 
     const handleSetStartDate = (newStartDate: string) => {
@@ -112,7 +112,7 @@ export default function SearchGear() {
 
     const handleCheckout = () => {
         console.log('checking out')
-        checkoutMutation.mutateAsync({ gearIds: cart, startDate: startDate, endDate: endDate })
+        checkoutMutation.mutateAsync({ gearIds: cart.map(item => item.id), startDate: startDate, endDate: endDate })
             .then(value => {
                 console.log(value)
                 setModalInfo(
@@ -144,8 +144,8 @@ export default function SearchGear() {
 
     const handleViewCart = () => {
         if (gearMutation.isSuccess) {
-            const cartItems = gearMutation.data.map(value => {
-                if (cart.includes(value.id)) return <li key={value.id}>{value.brand} {value.model}</li>
+            const cartItems = cart.map(value => {
+                return <li key={value.id}>{value.label}</li>
             })
 
             setModalInfo(
@@ -263,9 +263,9 @@ export default function SearchGear() {
                                     <td className=' p-1 w-3/12'>{item.categories.map(category => category.category.name)}</td>
                                     <td className=' p-1 w-1/12 m-auto gap-4 text-primary'>
                                         {item._count.instances != 0 ? <div className=" h-full">
-                                            {cart.includes(item.id) ?
+                                            {cart.map(item => item.id).includes(item.id) ?
                                                 <button onClick={() => handleRemoveFromCart(item.id)} className=' bg-secondary w-10 h-10 sm:w-8 sm:h-8 md:w-6 md:h-6 rounded-sm text-white'>-</button> :
-                                                <button onClick={() => handleAddToCart(item.id)} className=' bg-primary w-10 h-10 sm:w-8 sm:h-8 md:w-6 md:h-6 rounded-sm text-white'>+</button>
+                                                <button onClick={() => handleAddToCart(item.id, `${item.brand} - ${item.model}`)} className=' bg-primary w-10 h-10 sm:w-8 sm:h-8 md:w-6 md:h-6 rounded-sm text-white'>+</button>
                                             }
                                         </div> : <div></div>}
                                     </td>
