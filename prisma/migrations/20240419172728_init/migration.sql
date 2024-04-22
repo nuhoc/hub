@@ -1,12 +1,12 @@
 -- CreateTable
-CREATE TABLE "Post" (
+CREATE TABLE "Membership" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
 
-    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Membership_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -70,23 +70,31 @@ CREATE TABLE "Rental" (
 
 -- CreateTable
 CREATE TABLE "GearOnRental" (
-    "gearId" INTEGER NOT NULL,
+    "gearId" TEXT NOT NULL,
     "rentalId" INTEGER NOT NULL,
 
     CONSTRAINT "GearOnRental_pkey" PRIMARY KEY ("gearId","rentalId")
 );
 
 -- CreateTable
-CREATE TABLE "Gear" (
+CREATE TABLE "GearModel" (
     "id" SERIAL NOT NULL,
     "brand" TEXT,
     "model" TEXT,
-    "notes" TEXT,
-    "rentable" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Gear_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "GearModel_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GearInstance" (
+    "id" TEXT NOT NULL,
+    "gearModelId" INTEGER NOT NULL,
+    "notes" TEXT,
+    "rentable" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "GearInstance_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -106,7 +114,7 @@ CREATE TABLE "Category" (
 );
 
 -- CreateIndex
-CREATE INDEX "Post_name_idx" ON "Post"("name");
+CREATE INDEX "Membership_name_idx" ON "Membership"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
@@ -124,7 +132,7 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
 
 -- AddForeignKey
-ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Membership" ADD CONSTRAINT "Membership_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -139,13 +147,16 @@ ALTER TABLE "Rental" ADD CONSTRAINT "Rental_renterId_fkey" FOREIGN KEY ("renterI
 ALTER TABLE "Rental" ADD CONSTRAINT "Rental_authorizerId_fkey" FOREIGN KEY ("authorizerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "GearOnRental" ADD CONSTRAINT "GearOnRental_gearId_fkey" FOREIGN KEY ("gearId") REFERENCES "Gear"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "GearOnRental" ADD CONSTRAINT "GearOnRental_gearId_fkey" FOREIGN KEY ("gearId") REFERENCES "GearInstance"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "GearOnRental" ADD CONSTRAINT "GearOnRental_rentalId_fkey" FOREIGN KEY ("rentalId") REFERENCES "Rental"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CategoriesOnGear" ADD CONSTRAINT "CategoriesOnGear_gearId_fkey" FOREIGN KEY ("gearId") REFERENCES "Gear"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "GearInstance" ADD CONSTRAINT "GearInstance_gearModelId_fkey" FOREIGN KEY ("gearModelId") REFERENCES "GearModel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CategoriesOnGear" ADD CONSTRAINT "CategoriesOnGear_gearId_fkey" FOREIGN KEY ("gearId") REFERENCES "GearModel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CategoriesOnGear" ADD CONSTRAINT "CategoriesOnGear_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
