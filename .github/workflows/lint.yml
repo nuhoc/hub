@@ -12,15 +12,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_URL: "postgresql://postgres:password@localhost:5432/nuhoc-hub"
+      NEXTAUTH_SECRET: "redacted"
+      NEXTAUTH_URL: "http://localhost:3000"
+      GOOGLE_CLIENT_ID: "redacted"
+      GOOGLE_CLIENT_SECRET: "redacted"
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run lint
-      run: npm run lint
+      - name: Run lint
+        run: npm run lint
 
-    - name: Build
-      run: npm run build
+      - name: Build
+        run: npm run build

@@ -9,13 +9,20 @@ services:
     working_dir: /app
     ports:
       - "3000:3000"
-    image: t3-app
+    image: nuhoc-hub
     environment:
-      - DATABASE_URL=postgresql://postgres:3TfD_2y2lgyql0sB@localhost:5432/nuhoc-hub
+      - DATABASE_URL=${DATABASE_INTERCONTAINER_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
   database:
+    container_name: database
     image: "postgres:16"
     environment:
-      - POSTGRES_PASSWORD=3TfD_2y2lgyql0sB
-      - POSTGRES_DB=nuhoc-hub
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
+    expose:
+      - "5432"

@@ -26,7 +26,7 @@ We have docker setup (frontend broken at the moment)! So you can run the followi
 
 ```bash
 
-docker-compose up -d
+docker-compose up --build -d
 
 ```
 
@@ -38,11 +38,11 @@ npm run dev
 
 ```
 
-If you just want to run the database you can run:
+If you just want to run the database or frontend you can run:
 
 ```bash
 
-docker-compose up -d database
+docker-compose up -d <database|frontend>
 
 ```
 
@@ -58,11 +58,12 @@ To sync the Prisma schema changes to the database, you can run:
 
 ```bash
 
-npx prisma push
+npx prisma migrate
 
 ```
 
 To start Prisma Studio (GUI tool for database), you can run:
+
 ```bash
 
 npx prisma studio
