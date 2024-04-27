@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactElement, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import 'react-responsive-modal/styles.css';
 import { Modal } from 'react-responsive-modal'
@@ -15,7 +15,7 @@ export default function SearchGear() {
     const [cart, setCart] = useState<{ id: number, label: string }[]>([])
 
     const [open, setOpen] = useState(false);
-    const [modalInfo, setModalInfo] = useState<ReactElement>(<div></div>)
+    const [modalInfo, setModalInfo] = useState(<div></div>)
 
     const onOpenModal = () => setOpen(true);
     const onCloseModal = () => setOpen(false);
@@ -47,6 +47,7 @@ export default function SearchGear() {
 
     useEffect(() => {
         handleParameterizedGearQuery()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [category, orderType, searchTerms, currentPage, startDate, endDate])
 
     const FilterCheckbox = (props: { id: string, label: string }) => {
