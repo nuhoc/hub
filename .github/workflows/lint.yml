@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABASE_URL: "redacted"
+      DATABASE_URL: "postgresql://postgres:password@localhost:5432/nuhoc-hub"
       NEXTAUTH_SECRET: "redacted"
       GOOGLE_CLIENT_ID: "redacted"
       GOOGLE_CLIENT_SECRET: "redacted"
