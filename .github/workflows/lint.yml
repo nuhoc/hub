@@ -16,17 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Make envfile
-        uses: SpicyPizza/create-envfile@v2.0
-        with:
-          envkey_DEBUG: false
-          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          envkey_NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          envkey_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          envkey_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          fail_on_empty: false
-          file_name: .env
-
       - name: Install dependencies
         run: npm install
 
@@ -34,4 +23,12 @@ jobs:
         run: npm run lint
 
       - name: Build
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          envkey_NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          envkey_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          envkey_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          fail_on_empty: false
+          file_name: .env
         run: npm run build
