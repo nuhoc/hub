@@ -36,10 +36,10 @@ export default async function Account() {
             <div className=" flex flex-col gap-8 items-start">
                 <div>
                     <h4>Membership Perks</h4>
-                    <ul>
-                        <li className=" text-xl">- Discounted MetroRock membership</li>
-                        <li className=" text-xl">- Access to AllTrails Pro</li>
-                        <li className=" text-xl">- RockSpot Day Passes {session ? `(${dayPassesLeft} Left)` : "(3 Total)"}</li>
+                    <ul className=" list-disc list-inside">
+                        <li className=" text-xl">Discounted MetroRock membership</li>
+                        <li className=" text-xl">Access to AllTrails Pro</li>
+                        <li className=" text-xl">RockSpot Day Passes {session ? `(${dayPassesLeft} Left)` : "(3 Total)"}</li>
                     </ul>
                 </div>
                 <button className=" disabled:bg-gray-500 bg-primary text-white px-8 py-3 rounded-lg" disabled><p>Renew Online (Coming Soon™)</p></button>
