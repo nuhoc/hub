@@ -7,23 +7,23 @@ enum RentalStatus {
     RESERVED = "Reserved",
 }
 
-export default function RentalInfo(props: { startDate: Date, endDate: Date, pickupDate?: Date, returnDate?: Date, cancelDate?: Date, items: string[] }) {
+export default function RentalInfo(props: { startDate: Date, endDate: Date, pickupDate?: Date | null, returnDate?: Date | null, cancelDate?: Date | null, items: string[] }) {
     let status;
     let caption;
     let color;
 
     switch (true) {
-        case (props.returnDate !== undefined):
+        case (props.returnDate !== undefined && props.returnDate !== null):
             status = RentalStatus.RETURNED
             caption = `Returned on ${props.returnDate.toDateString()}`
             color = "bg-gray-400"
             break
-        case (props.cancelDate !== undefined):
+        case (props.cancelDate !== undefined && props.cancelDate !== null):
             status = RentalStatus.CANCELED
             caption = `Canceled on ${props.cancelDate.toDateString()}`
             color = "bg-gray-400"
             break
-        case (props.pickupDate !== undefined):
+        case (props.pickupDate !== undefined && props.pickupDate !== null):
             status = RentalStatus.PICKED_UP
             caption = `Picked-up on ${props.pickupDate.toDateString()}`
             color = "bg-primary"
@@ -56,7 +56,7 @@ export default function RentalInfo(props: { startDate: Date, endDate: Date, pick
                 {props.items.slice(0, 3).map((item) => {
                     return <li key={item}>{item}</li>
                 })}
-                {props.items.length > 3 && <li>and {props.items.length - 3} more items...</li>}
+                {props.items.length > 3 && <li>and {props.items.length - 3} more item(s)...</li>}
             </ul>
         </div>
         <div className=" flex flex-row flex-wrap lg:flex-col justify-between gap-4">

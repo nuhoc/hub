@@ -87,6 +87,7 @@ model Rental {
   rentStart  DateTime
   rentDue    DateTime
   rentReturn DateTime?
+  // TODO: Add pickup and canceled dates
 
   notes String?
 }
