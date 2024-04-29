@@ -3,13 +3,15 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Frontend.Dockerfile
       args:
         NEXT_PUBLIC_CLIENTVAR: "clientvar"
     working_dir: /app
     ports:
       - "3000:3000"
     image: nuhoc-hub
+    depends_on:
+      - database
     environment:
       - DATABASE_URL=${DATABASE_INTERCONTAINER_URL}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
