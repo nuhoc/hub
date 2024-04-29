@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { db } from "~/server/db";
 
 export const rentalRouter = createTRPCRouter({
   getRentalHistory: protectedProcedure
@@ -38,4 +39,14 @@ export const rentalRouter = createTRPCRouter({
     }),
 
   // TODO: Add cancel reservation endpoint
+  cancelReservation: protectedProcedure
+    .input(z.object({ rentalId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.rental.delete({
+        where: {
+          renterId: ctx.session.user.id,
+          id: input.rentalId,
+        },
+      });
+    }),
 });

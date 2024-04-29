@@ -1,3 +1,4 @@
+import { api } from "~/trpc/react";
 
 enum RentalStatus {
     RETURNED = "Returned",
@@ -7,10 +8,18 @@ enum RentalStatus {
     RESERVED = "Reserved",
 }
 
-export default function RentalInfo(props: { startDate: Date, endDate: Date, pickupDate?: Date | null, returnDate?: Date | null, cancelDate?: Date | null, items: string[] }) {
+export default function RentalInfo(props: { rentalId: number, startDate: Date, endDate: Date, pickupDate?: Date | null, returnDate?: Date | null, cancelDate?: Date | null, items: string[] }) {
     let status;
     let caption;
     let color;
+
+    const deleteReservationMutation = api.rental.cancelReservation.useMutation()
+
+    const handleCancelReservation = () => {
+        deleteReservationMutation.mutateAsync({ rentalId: props.rentalId })
+            .then(() => console.log("successfully canceled"))
+            .catch(reason => console.error(reason))
+    }
 
     switch (true) {
         case (props.returnDate !== undefined && props.returnDate !== null):
@@ -60,7 +69,7 @@ export default function RentalInfo(props: { startDate: Date, endDate: Date, pick
             </ul>
         </div>
         <div className=" flex flex-row flex-wrap lg:flex-col justify-between gap-4">
-            <button disabled={status !== RentalStatus.RESERVED} className=" disabled:bg-gray-400 grow w-56 h-10 bg-primary text-white rounded-lg flex justify-center items-center">
+            <button disabled={status !== RentalStatus.RESERVED} onClick={handleCancelReservation} className=" disabled:bg-gray-400 grow w-56 h-10 bg-primary text-white rounded-lg flex justify-center items-center">
                 <p className=" text-lg text-wrap">Cancel Reservation</p>
             </button>
             <button disabled={status !== RentalStatus.CANCELED && status !== RentalStatus.RETURNED} className=" disabled:bg-gray-400 grow w-56 h-10 bg-primary text-white rounded-lg flex justify-center items-center">

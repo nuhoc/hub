@@ -22,7 +22,7 @@ export default function RentalHistory() {
             <option value="asc">Sort by: Oldest</option>
         </select>
         {pastRentalsMutation.isSuccess && pastRentalsMutation.data.map((rental) => {
-            return <RentalInfo key={rental.id} startDate={rental.rentStart} endDate={rental.rentDue} returnDate={rental.rentReturn} items={rental.gearRented.map(gear => `${gear.gear.gearModel.brand} - ${gear.gear.gearModel.model}`)} />
+            return <RentalInfo key={rental.id} rentalId={rental.id} startDate={rental.rentStart} endDate={rental.rentDue} returnDate={rental.rentReturn} items={rental.gearRented.map(gear => `${gear.gear.gearModel.brand} - ${gear.gear.gearModel.model}`)} />
         })}
     </div>
 }
