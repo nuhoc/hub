@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
-import 'react-responsive-modal/styles.css';
-import { Modal } from 'react-responsive-modal'
+import { useModal } from "../_hooks/use-modal";
 
 export default function SearchGear() {
     const [category, setCategory] = useState('');
@@ -14,11 +13,7 @@ export default function SearchGear() {
     const [endDate, setEndDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
     const [cart, setCart] = useState<{ id: number, label: string }[]>([])
 
-    const [open, setOpen] = useState(false);
-    const [modalInfo, setModalInfo] = useState(<div></div>)
-
-    const onOpenModal = () => setOpen(true);
-    const onCloseModal = () => setOpen(false);
+    const { setOpen, addInfo } = useModal()
 
     const gearMutation = api.gear.getFiltered.useMutation();
     const checkoutMutation = api.gear.checkoutGear.useMutation();
@@ -35,12 +30,12 @@ export default function SearchGear() {
             .then(() => console.log("success"))
             .catch((reason) => {
                 console.error(reason)
-                setModalInfo(
+                addInfo(
                     <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
                         <h4 className="text-secondary">Uh oh, an error happened</h4>
                         <p>Error querying gear</p>
                     </div>)
-                onOpenModal()
+                setOpen(true)
 
             })
     }
@@ -116,24 +111,24 @@ export default function SearchGear() {
         checkoutMutation.mutateAsync({ gearIds: cart.map(item => item.id), startDate: startDate, endDate: endDate })
             .then(value => {
                 console.log(value)
-                setModalInfo(
+                addInfo(
                     <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-secondary">Checkout successful!</h4>
+                        <h4 className="text-primary">Checkout successful!</h4>
                         <p>{`Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`}</p>
                     </div>)
 
-                onOpenModal()
+                setOpen(true)
 
             })
             .catch(reason => {
                 console.error(reason)
-                setModalInfo(
+                addInfo(
                     <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
                         <h4 className="text-secondary">Uh oh, an error happened</h4>
                         <p>{`${reason}`}</p>
                     </div>)
 
-                onOpenModal()
+                setOpen(true)
                 // TODO: Remove unavailable items from cart instead of all
             })
             .finally(() => {
@@ -149,7 +144,7 @@ export default function SearchGear() {
                 return <li key={value.id}>{value.label}</li>
             })
 
-            setModalInfo(
+            addInfo(
                 <div className="pt-10 p-4 rounded-lg flex flex-col gap-4 ">
                     <h4>Current Cart</h4>
                     {cartItems.length != 0 ?
@@ -157,7 +152,7 @@ export default function SearchGear() {
                         <p>Looks like you havent added anything yet, try pressing the plus sign!</p>
                     }
                 </div>)
-            onOpenModal()
+            setOpen(true)
         }
     }
 
@@ -185,12 +180,6 @@ export default function SearchGear() {
 
 
     return <div className=" flex flex-col lg:flex-row gap-5">
-        <Modal open={open} onClose={onCloseModal} center classNames={{ modal: "rounded-lg" }}>
-            <div className=" pt-10 p-4 rounded-lg flex flex-col gap-4">
-                {modalInfo}
-                <button className=" self-end" onClick={onCloseModal}>Dismiss</button>
-            </div>
-        </Modal>
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
             <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
             <div className=" flex flex-col gap-1">

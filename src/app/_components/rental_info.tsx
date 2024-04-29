@@ -1,17 +1,36 @@
 import { api } from "~/trpc/react";
 import { RentalStatus } from "../types";
+import { useModal } from "../_hooks/use-modal";
 
 export default function RentalInfo(props: { rentalId: number, startDate: Date, endDate: Date, pickupDate?: Date | null, returnDate?: Date | null, cancelDate?: Date | null, items: string[] }) {
     let status;
     let caption;
     let color;
 
+    const { setOpen, addInfo } = useModal()
+
     const deleteReservationMutation = api.rental.cancelReservation.useMutation()
 
     const handleCancelReservation = () => {
         deleteReservationMutation.mutateAsync({ rentalId: props.rentalId })
-            .then(() => console.log("successfully canceled"))
-            .catch(reason => console.error(reason))
+            .then(value => {
+                console.log(value)
+                addInfo(
+                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
+                        <h4 className="text-primary">Rental Succesfully Canceled</h4>
+                        <p>Items have been released to others</p>
+                    </div>);
+                setOpen(true)
+            })
+            .catch(reason => {
+                console.error(reason)
+                addInfo(
+                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
+                        <h4 className="text-primary">Error canceling reservation</h4>
+                        <p>{`${reason}`}</p>
+                    </div>);
+                setOpen(true)
+            })
     }
 
     if (props.returnDate) {
