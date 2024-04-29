@@ -87,6 +87,7 @@ model Rental {
   rentStart  DateTime
   rentDue    DateTime
   rentReturn DateTime?
+  rentPickup DateTime?
 
   notes String?
 }
@@ -95,7 +96,7 @@ model GearOnRental {
   gear   GearInstance @relation(fields: [gearId], references: [id])
   gearId String // relation scalar field (used in the `@relation` attribute above)
 
-  rental   Rental @relation(fields: [rentalId], references: [id])
+  rental   Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
   rentalId Int // relation scalar field (used in the `@relation` attribute above)
 
   @@id([gearId, rentalId])

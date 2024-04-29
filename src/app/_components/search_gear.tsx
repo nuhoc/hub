@@ -2,30 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
-import 'react-responsive-modal/styles.css';
-import { Modal } from 'react-responsive-modal'
+import { useModal } from "../_hooks/use-modal";
+import NoResults from "./no_results";
+import Link from "next/link";
+import { OrderingDirection } from "../types";
 
 export default function SearchGear() {
     const [category, setCategory] = useState('');
-    const [orderType, setOrderType] = useState('desc');
+    const [orderType, setOrderType] = useState<OrderingDirection>(OrderingDirection.DESCENDING);
     const [searchTerms, setSearchTerms] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const [startDate, setStartDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
     const [endDate, setEndDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
     const [cart, setCart] = useState<{ id: number, label: string }[]>([])
 
-    const [open, setOpen] = useState(false);
-    const [modalInfo, setModalInfo] = useState(<div></div>)
-
-    const onOpenModal = () => setOpen(true);
-    const onCloseModal = () => setOpen(false);
+    const { setOpen, addSimpleInfo, addInfo } = useModal()
 
     const gearMutation = api.gear.getFiltered.useMutation();
     const checkoutMutation = api.gear.checkoutGear.useMutation();
 
     const handleParameterizedGearQuery = () => {
         gearMutation.mutateAsync({
-            orderType: orderType === 'asc' ? 'asc' : 'desc',
+            orderType: orderType,
             page: currentPage,
             category: category,
             searchTerms: searchTerms,
@@ -35,12 +33,8 @@ export default function SearchGear() {
             .then(() => console.log("success"))
             .catch((reason) => {
                 console.error(reason)
-                setModalInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-secondary">Uh oh, an error happened</h4>
-                        <p>Error querying gear</p>
-                    </div>)
-                onOpenModal()
+                addSimpleInfo("Uh oh, an error happened", "Error querying gear", true)
+                setOpen(true)
 
             })
     }
@@ -57,7 +51,7 @@ export default function SearchGear() {
         </div>
     }
 
-    const handleSetOrderType = (newOrderType: string) => {
+    const handleSetOrderType = (newOrderType: OrderingDirection) => {
         setCurrentPage(0);
         setOrderType(newOrderType)
     }
@@ -116,24 +110,14 @@ export default function SearchGear() {
         checkoutMutation.mutateAsync({ gearIds: cart.map(item => item.id), startDate: startDate, endDate: endDate })
             .then(value => {
                 console.log(value)
-                setModalInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-secondary">Checkout successful!</h4>
-                        <p>{`Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`}</p>
-                    </div>)
-
-                onOpenModal()
+                addSimpleInfo("Checkout successful!", `Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`)
+                setOpen(true)
 
             })
             .catch(reason => {
                 console.error(reason)
-                setModalInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-secondary">Uh oh, an error happened</h4>
-                        <p>{`${reason}`}</p>
-                    </div>)
-
-                onOpenModal()
+                addSimpleInfo("Uh oh, an error happened", `${reason}`, true)
+                setOpen(true)
                 // TODO: Remove unavailable items from cart instead of all
             })
             .finally(() => {
@@ -149,7 +133,7 @@ export default function SearchGear() {
                 return <li key={value.id}>{value.label}</li>
             })
 
-            setModalInfo(
+            addInfo(
                 <div className="pt-10 p-4 rounded-lg flex flex-col gap-4 ">
                     <h4>Current Cart</h4>
                     {cartItems.length != 0 ?
@@ -157,7 +141,7 @@ export default function SearchGear() {
                         <p>Looks like you havent added anything yet, try pressing the plus sign!</p>
                     }
                 </div>)
-            onOpenModal()
+            setOpen(true)
         }
     }
 
@@ -185,12 +169,6 @@ export default function SearchGear() {
 
 
     return <div className=" flex flex-col lg:flex-row gap-5">
-        <Modal open={open} onClose={onCloseModal} center classNames={{ modal: "rounded-lg" }}>
-            <div className=" pt-10 p-4 rounded-lg flex flex-col gap-4">
-                {modalInfo}
-                <button className=" self-end" onClick={onCloseModal}>Dismiss</button>
-            </div>
-        </Modal>
         <div className=" bg-white rounded-lg outline outline-1 outline-gray-400 p-6 flex flex-col gap-5">
             <input onChange={e => handleSetSearchTerms(e.target.value)} className=" rounded-md outline outline-1 outline-gray-400 px-4 py-2" type="text" placeholder="Search for cool gear" />
             <div className=" flex flex-col gap-1">
@@ -239,10 +217,13 @@ export default function SearchGear() {
                     <CategoryCheckbox category="climb" label="Climb" />
                     <CategoryCheckbox category="snow" label="Snow" />
                 </div>
-                <select onChange={e => handleSetOrderType(e.target.value)} name="sort" id="sort" className=" bg-gray-300 hover:bg-white outline outline-1 outline-gray-400 py-2 px-4 text-left rounded-lg">
-                    <option value="desc">Most Relevant</option>
-                    <option value="asc">Least Relevant</option>
-                </select>
+                <div className=" w-full flex flex-row justify-between">
+                    <select onChange={e => handleSetOrderType(e.target.value as OrderingDirection)} name="sort" id="sort" className=" bg-gray-300 hover:bg-white outline outline-1 outline-gray-400 py-2 px-4 text-left rounded-lg">
+                        <option value={OrderingDirection.DESCENDING}>Most Relevant</option>
+                        <option value={OrderingDirection.ASCENDING}>Least Relevant</option>
+                    </select>
+                    <Link href="/account/history" className=" bg-primary hover:text-secondary text-white py-2 px-4 text-left rounded-lg">Past Rentals</Link>
+                </div>
                 <div>{gearMutation?.data ? gearMutation.data.length : '0'} Results</div>
                 <div className=" w-full overflow-x-auto">
                     <table className='w-full table-auto divide-y-2 divide-gray-200 text-pretty'>
@@ -280,11 +261,7 @@ export default function SearchGear() {
                                 </tr>}
                         </tbody>
                     </table>
-                    {gearMutation.isSuccess && gearMutation.data.length == 0 &&
-                        <div className=" text-center p-12">
-                            <h5>No results</h5>
-                            <p>Try removing filters or use different search phrases.</p>
-                        </div>}
+                    {gearMutation.isSuccess && gearMutation.data.length == 0 && <NoResults />}
                 </div>
             </div>
             <div className=" w-full flex flex-row justify-center gap-4">

@@ -49,7 +49,7 @@ export default async function RootLayout({
         <body className={`font-sans ${inter.variable} ${shrikhand.variable} ${raleway.variable} h-full w-full min-h-full flex flex-col justify-between`}>
           <Navbar loggedIn={!!session} />
           <div className=" bg-white w-full bg-opacity-85 grow">
-            <div className=" h-full py-8 px-4 md:px-16 lg:px-40">{children}</div>
+            <div className=" h-full py-8 px-4 md:px-16 lg:px-24 xl:px-40">{children}</div>
           </div>
           <Footer />
         </body>
