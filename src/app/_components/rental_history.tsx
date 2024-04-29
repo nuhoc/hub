@@ -5,16 +5,21 @@ import { useEffect, useState } from "react"
 import RentalInfo from './rental_info';
 import { api } from "~/trpc/react";
 import { ModalProvider } from "../_hooks/use-modal";
+import NoResults from "./no_results";
 
 export default function RentalHistory() {
     const [sort, setSort] = useState<OrderingDirection>(OrderingDirection.DESCENDING)
     const pastRentalsMutation = api.rental.getRentalHistory.useMutation()
 
-    useEffect(() => {
+    const handleParameterizedGearQuery = () => {
         pastRentalsMutation.mutateAsync({ orderType: sort, page: 0 })
             .then(value => console.log(value))
             .catch(reason => console.error(reason))
             .finally(() => console.log("finally"))
+    }
+
+    useEffect(() => {
+        handleParameterizedGearQuery()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sort])
 
@@ -25,8 +30,11 @@ export default function RentalHistory() {
                 <option value={OrderingDirection.ASCENDING}>Sort by: Oldest</option>
             </select>
             {pastRentalsMutation.isSuccess && pastRentalsMutation.data.map((rental) => {
-                return <RentalInfo key={rental.id} rentalId={rental.id} startDate={rental.rentStart} endDate={rental.rentDue} pickupDate={rental.rentPickup} returnDate={rental.rentReturn} items={rental.gearRented.map(gear => `${gear.gear.gearModel.brand} - ${gear.gear.gearModel.model}`)} />
+                return <RentalInfo onCancel={handleParameterizedGearQuery} key={rental.id} rentalId={rental.id} startDate={rental.rentStart} endDate={rental.rentDue} pickupDate={rental.rentPickup} returnDate={rental.rentReturn} items={rental.gearRented.map(gear => `${gear.gear.gearModel.brand} - ${gear.gear.gearModel.model}`)} />
             })}
+            <div className=" w-full flex justify-center">
+                {pastRentalsMutation.isSuccess && pastRentalsMutation.data.length == 0 && <NoResults />}
+            </div>
         </div>
     </ModalProvider>
 }

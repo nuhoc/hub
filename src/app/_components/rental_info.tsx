@@ -2,7 +2,7 @@ import { api } from "~/trpc/react";
 import { RentalStatus } from "../types";
 import { useModal } from "../_hooks/use-modal";
 
-export default function RentalInfo(props: { rentalId: number, startDate: Date, endDate: Date, pickupDate?: Date | null, returnDate?: Date | null, cancelDate?: Date | null, items: string[] }) {
+export default function RentalInfo(props: { onCancel: () => void, rentalId: number, startDate: Date, endDate: Date, pickupDate?: Date | null, returnDate?: Date | null, cancelDate?: Date | null, items: string[] }) {
     let status;
     let caption;
     let color;
@@ -26,11 +26,12 @@ export default function RentalInfo(props: { rentalId: number, startDate: Date, e
                 console.error(reason)
                 addInfo(
                     <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-primary">Error canceling reservation</h4>
+                        <h4 className="text-secondary">Error canceling reservation</h4>
                         <p>{`${reason}`}</p>
                     </div>);
                 setOpen(true)
             })
+            .finally(props.onCancel)
     }
 
     if (props.returnDate) {

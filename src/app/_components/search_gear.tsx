@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import { useModal } from "../_hooks/use-modal";
+import NoResults from "./no_results";
 
 export default function SearchGear() {
     const [category, setCategory] = useState('');
@@ -269,11 +270,7 @@ export default function SearchGear() {
                                 </tr>}
                         </tbody>
                     </table>
-                    {gearMutation.isSuccess && gearMutation.data.length == 0 &&
-                        <div className=" text-center p-12">
-                            <h5>No results</h5>
-                            <p>Try removing filters or use different search phrases.</p>
-                        </div>}
+                    {gearMutation.isSuccess && gearMutation.data.length == 0 && <NoResults />}
                 </div>
             </div>
             <div className=" w-full flex flex-row justify-center gap-4">
