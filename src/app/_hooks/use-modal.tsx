@@ -1,7 +1,7 @@
 import 'react-responsive-modal/styles.css';
 import { Modal } from 'react-responsive-modal'
 import { createContext, useContext, useState } from "react";
-import { ModalContextProps, ModalInfo } from "../types";
+import type { ModalContextProps, ModalInfo } from "../types";
 
 const ModalContext = createContext<null | ModalInfo>(null);
 
