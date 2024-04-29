@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import { useModal } from "../_hooks/use-modal";
 import NoResults from "./no_results";
+import Link from "next/link";
+import { OrderingDirection } from "../types";
 
 export default function SearchGear() {
     const [category, setCategory] = useState('');
-    const [orderType, setOrderType] = useState('desc');
+    const [orderType, setOrderType] = useState<OrderingDirection>(OrderingDirection.DESCENDING);
     const [searchTerms, setSearchTerms] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const [startDate, setStartDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
@@ -21,7 +23,7 @@ export default function SearchGear() {
 
     const handleParameterizedGearQuery = () => {
         gearMutation.mutateAsync({
-            orderType: orderType === 'asc' ? 'asc' : 'desc',
+            orderType: orderType,
             page: currentPage,
             category: category,
             searchTerms: searchTerms,
@@ -49,7 +51,7 @@ export default function SearchGear() {
         </div>
     }
 
-    const handleSetOrderType = (newOrderType: string) => {
+    const handleSetOrderType = (newOrderType: OrderingDirection) => {
         setCurrentPage(0);
         setOrderType(newOrderType)
     }
@@ -215,10 +217,13 @@ export default function SearchGear() {
                     <CategoryCheckbox category="climb" label="Climb" />
                     <CategoryCheckbox category="snow" label="Snow" />
                 </div>
-                <select onChange={e => handleSetOrderType(e.target.value)} name="sort" id="sort" className=" bg-gray-300 hover:bg-white outline outline-1 outline-gray-400 py-2 px-4 text-left rounded-lg">
-                    <option value="desc">Most Relevant</option>
-                    <option value="asc">Least Relevant</option>
-                </select>
+                <div className=" w-full flex flex-row justify-between">
+                    <select onChange={e => handleSetOrderType(e.target.value as OrderingDirection)} name="sort" id="sort" className=" bg-gray-300 hover:bg-white outline outline-1 outline-gray-400 py-2 px-4 text-left rounded-lg">
+                        <option value={OrderingDirection.DESCENDING}>Most Relevant</option>
+                        <option value={OrderingDirection.ASCENDING}>Least Relevant</option>
+                    </select>
+                    <Link href="/account/history" className=" bg-primary hover:text-secondary text-white py-2 px-4 text-left rounded-lg">Past Rentals</Link>
+                </div>
                 <div>{gearMutation?.data ? gearMutation.data.length : '0'} Results</div>
                 <div className=" w-full overflow-x-auto">
                     <table className='w-full table-auto divide-y-2 divide-gray-200 text-pretty'>
