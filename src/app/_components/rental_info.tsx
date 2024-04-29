@@ -1,12 +1,5 @@
 import { api } from "~/trpc/react";
-
-enum RentalStatus {
-    RETURNED = "Returned",
-    CANCELED = "Canceled",
-    PICKED_UP = "Picked-up",
-    OVERDUE = "Overdue",
-    RESERVED = "Reserved",
-}
+import { RentalStatus } from "../types";
 
 export default function RentalInfo(props: { rentalId: number, startDate: Date, endDate: Date, pickupDate?: Date | null, returnDate?: Date | null, cancelDate?: Date | null, items: string[] }) {
     let status;
@@ -21,33 +14,26 @@ export default function RentalInfo(props: { rentalId: number, startDate: Date, e
             .catch(reason => console.error(reason))
     }
 
-    switch (true) {
-        case (props.returnDate !== undefined && props.returnDate !== null):
-            status = RentalStatus.RETURNED
-            caption = `Returned on ${props.returnDate.toDateString()}`
-            color = "bg-gray-400"
-            break
-        case (props.cancelDate !== undefined && props.cancelDate !== null):
-            status = RentalStatus.CANCELED
-            caption = `Canceled on ${props.cancelDate.toDateString()}`
-            color = "bg-gray-400"
-            break
-        case (props.pickupDate !== undefined && props.pickupDate !== null):
-            status = RentalStatus.PICKED_UP
-            caption = `Picked-up on ${props.pickupDate.toDateString()}`
-            color = "bg-primary"
-            break
-        // Assumes the other dates are undefined
-        case (props.endDate.getTime() < Date.now()):
-            status = RentalStatus.OVERDUE
-            caption = "Please return items as soon as possible"
-            color = "bg-secondary"
-            break;
-        default:
-            status = RentalStatus.RESERVED
-            caption = "Pickup as soon as reservation starts"
-            color = "bg-primary"
-            break;
+    if (props.returnDate) {
+        status = RentalStatus.RETURNED
+        caption = `Thank you! Returned on ${props.returnDate.toDateString()}`
+        color = "bg-gray-400"
+    } else if (props.pickupDate) {
+        status = RentalStatus.PICKED_UP
+        caption = `Picked-up on ${props.pickupDate.toDateString()}`
+        color = "bg-primary"
+    } else if (!props.pickupDate && props.endDate.getTime() < Date.now()) {
+        status = RentalStatus.EXPIRED
+        caption = "You did not pick up your items in time"
+        color = "bg-gray-400"
+    } else if (!props.returnDate && props.endDate.getTime() < Date.now()) {
+        status = RentalStatus.OVERDUE
+        caption = "Please return items as soon as possible"
+        color = "bg-secondary"
+    } else {
+        status = RentalStatus.RESERVED
+        caption = "Pickup as soon as reservation starts"
+        color = "bg-primary"
     }
 
     return <div className=" p-8 w-full bg-white rounded-lg outline outline-1 outline-gray-400 flex flex-col lg:flex-row gap-4 md:gap-6 lg:gap-16 justify-between">
@@ -72,7 +58,7 @@ export default function RentalInfo(props: { rentalId: number, startDate: Date, e
             <button disabled={status !== RentalStatus.RESERVED} onClick={handleCancelReservation} className=" disabled:bg-gray-400 grow w-56 h-10 bg-primary text-white rounded-lg flex justify-center items-center">
                 <p className=" text-lg text-wrap">Cancel Reservation</p>
             </button>
-            <button disabled={status !== RentalStatus.CANCELED && status !== RentalStatus.RETURNED} className=" disabled:bg-gray-400 grow w-56 h-10 bg-primary text-white rounded-lg flex justify-center items-center">
+            <button disabled={status !== RentalStatus.EXPIRED && status !== RentalStatus.RETURNED} className=" disabled:bg-gray-400 grow w-56 h-10 bg-primary text-white rounded-lg flex justify-center items-center">
                 <p className=" text-lg">Quick Reserve</p>
             </button>
         </div>

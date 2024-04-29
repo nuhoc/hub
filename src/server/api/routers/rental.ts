@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { db } from "~/server/db";
 
 export const rentalRouter = createTRPCRouter({
   getRentalHistory: protectedProcedure
