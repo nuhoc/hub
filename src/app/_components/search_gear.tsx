@@ -14,7 +14,7 @@ export default function SearchGear() {
     const [endDate, setEndDate] = useState<string>(new Date(Date.now()).toISOString().split('T')[0] ?? '')
     const [cart, setCart] = useState<{ id: number, label: string }[]>([])
 
-    const { setOpen, addInfo } = useModal()
+    const { setOpen, addSimpleInfo, addInfo } = useModal()
 
     const gearMutation = api.gear.getFiltered.useMutation();
     const checkoutMutation = api.gear.checkoutGear.useMutation();
@@ -31,11 +31,7 @@ export default function SearchGear() {
             .then(() => console.log("success"))
             .catch((reason) => {
                 console.error(reason)
-                addInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-secondary">Uh oh, an error happened</h4>
-                        <p>Error querying gear</p>
-                    </div>)
+                addSimpleInfo("Uh oh, an error happened", "Error querying gear", true)
                 setOpen(true)
 
             })
@@ -112,23 +108,13 @@ export default function SearchGear() {
         checkoutMutation.mutateAsync({ gearIds: cart.map(item => item.id), startDate: startDate, endDate: endDate })
             .then(value => {
                 console.log(value)
-                addInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-primary">Checkout successful!</h4>
-                        <p>{`Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`}</p>
-                    </div>)
-
+                addSimpleInfo("Checkout successful!", `Reservation #${value.id}. Return by ${value.rentDue.toDateString()}`)
                 setOpen(true)
 
             })
             .catch(reason => {
                 console.error(reason)
-                addInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-secondary">Uh oh, an error happened</h4>
-                        <p>{`${reason}`}</p>
-                    </div>)
-
+                addSimpleInfo("Uh oh, an error happened", `${reason}`, true)
                 setOpen(true)
                 // TODO: Remove unavailable items from cart instead of all
             })

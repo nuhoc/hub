@@ -7,7 +7,7 @@ export default function RentalInfo(props: { onCancel: () => void, rentalId: numb
     let caption;
     let color;
 
-    const { setOpen, addInfo } = useModal()
+    const { setOpen, addSimpleInfo } = useModal()
 
     const deleteReservationMutation = api.rental.cancelReservation.useMutation()
 
@@ -15,20 +15,12 @@ export default function RentalInfo(props: { onCancel: () => void, rentalId: numb
         deleteReservationMutation.mutateAsync({ rentalId: props.rentalId })
             .then(value => {
                 console.log(value)
-                addInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-primary">Rental Succesfully Canceled</h4>
-                        <p>Items have been released to others</p>
-                    </div>);
+                addSimpleInfo("Rental Succesfully Canceled", "Items have been released to others");
                 setOpen(true)
             })
             .catch(reason => {
                 console.error(reason)
-                addInfo(
-                    <div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
-                        <h4 className="text-secondary">Error canceling reservation</h4>
-                        <p>{`${reason}`}</p>
-                    </div>);
+                addSimpleInfo("Uh oh, an error happened", `${reason}`, true)
                 setOpen(true)
             })
             .finally(props.onCancel)

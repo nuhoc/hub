@@ -40,5 +40,29 @@ export const useModal = () => {
     }
     const { info, open, setOpen, addInfo, removeInfo } = context;
 
-    return { info, open, setOpen, addInfo, removeInfo };
+    const addSimpleInfo = (title: string, info: string, error?: boolean) => {
+        addInfo(<div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
+            <h4 className={error ? "text-secondary" : "text-primary"}>{title}</h4>
+            <p>{info}</p>
+        </div>)
+    }
+
+    return { info, open, setOpen, addInfo, addSimpleInfo, removeInfo };
+};
+
+export const useSimpleModal = () => {
+    const context = useContext(ModalContext);
+    if (!context) {
+        throw new Error("ModalContext must be used within a ModalProvider");
+    }
+    const { info, open, setOpen, addInfo, removeInfo } = context;
+
+    const addSimpleInfo = (title: string, info: string, error?: boolean) => {
+        addInfo(<div className="pt-10 p-4 rounded-lg flex flex-col gap-4">
+            <h4 className={error ? "text-secondary" : "text-primary"}>{title}</h4>
+            <p>{info}</p>
+        </div>)
+    }
+
+    return { info, open, setOpen, addSimpleInfo, removeInfo };
 };
